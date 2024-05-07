@@ -1,14 +1,19 @@
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
+
 
 @dataclass
 class Comprobante:
-    id: int
     ruc: str
     fecha_emision: str
     serie: str
     numero: int
     monto: float
     id_tipo_comprobante: int
+    id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     def to_json(self):
         return {
@@ -18,5 +23,6 @@ class Comprobante:
             'serie': self.serie,
             'numero': self.numero,
             'monto': self.monto,
-            'id_tipo_comprobante': self.id_tipo_comprobante
+            'id_tipo_comprobante': self.id_tipo_comprobante,
+            'created_at': self.created_at
         }
