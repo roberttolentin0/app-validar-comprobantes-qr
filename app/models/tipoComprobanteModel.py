@@ -1,12 +1,10 @@
+from dataclasses import dataclass
+
+@dataclass
 class TipoComprobante():
-    def __init__(
-            self,
-            id,
-            cod_comprobante,
-            descripcion) -> None:
-        self.id=id
-        self.cod_comprobante=cod_comprobante,
-        self.descripcion=descripcion
+    id: int
+    cod_comprobante: str
+    descripcion: str
 
     def to_json(self):
         return {

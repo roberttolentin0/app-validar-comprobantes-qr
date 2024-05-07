@@ -1,18 +1,13 @@
+from dataclasses import dataclass
+
+@dataclass
 class EstadoComprobante():
-    def __init__(
-            self,
-            id,
-            estado_comprobante,
-            estado_ruc,
-            cod_domiciliaria_ruc,
-            observaciones,
-            id_comprobante) -> None:
-        self.id=id
-        self.estado_comprobante=estado_comprobante
-        self.estado_ruc=estado_ruc
-        self.cod_domiciliaria_ruc=cod_domiciliaria_ruc
-        self.observaciones=observaciones
-        self.id_comprobante=id_comprobante
+    id: int
+    estado_comprobante: str
+    estado_ruc: str
+    cod_domiciliaria_ruc: str
+    observaciones: str
+    id_comprobante: int
 
     def to_json(self):
         return {
