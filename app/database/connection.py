@@ -1,17 +1,18 @@
+import psycopg2
 from contextlib import contextmanager
 from typing import Any, Iterator, List, Optional
-
-import sqlite3
-
 from config import Config
-# from .security import _encrypt_decrypt
 
-DATABASE_PATH = Config.DATABASE_PATH
+from app.database.db_connection import PGConnection
 
+# DATABASE_PATH = Config.DATABASE_PATH
 
-def __get_cursor() -> Iterator[sqlite3.Cursor]:
-    connection: sqlite3.Connection = sqlite3.connect(DATABASE_PATH)
-    cursor: sqlite3.Cursor = connection.cursor()
+connectionDB = PGConnection()
+
+@contextmanager
+def __get_cursor() -> Iterator[psycopg2.extensions.cursor]:
+    connection = connectionDB
+    cursor = connection.cursor()
     try:
         yield cursor
         connection.commit()
