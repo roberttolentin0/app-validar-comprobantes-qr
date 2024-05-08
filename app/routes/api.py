@@ -45,3 +45,17 @@ def create():
     #     return jsonify({'message': 'success', 'data': {'dni': permission.dni}}), 200
     # else:
     #     return jsonify({'message': "Error on insert"}), 500
+
+@api_scope.route('/validar/comprobantes', methods=['POST'])
+def validar_comprobantes():
+    # obtener los comprobantes sin validar
+    # crear una lista con los comprobantes sin validar
+    # Recorrrer la lista para validar comprobantes
+    # Guardar estados de comrpobantes
+    try:
+        if request.method == 'POST':
+            estados_sunat = comprobantes_controller.validar_en_sunat()
+            print('Validado')
+            return jsonify({'message': 'success', 'data': estados_sunat}), 200
+    except Exception as e:
+        return jsonify({'message': "Error en validar comprobante"}), 500

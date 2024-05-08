@@ -40,7 +40,10 @@ def create(comprobante: Comprobante) -> Comprobante:
 
 def list_all() -> List[Comprobante]:
     print('Entro list all')
-    query = "SELECT * FROM comprobantes"
+    query = """
+        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
+	    FROM public.comprobantes
+    """
     records = connection._fetch_all(query=query)
 
     comprobantes = []
@@ -53,5 +56,23 @@ def list_all() -> List[Comprobante]:
                               monto=record[5],
                               id_tipo_comprobante=record[8],
                               created_at=record[7])
+        comprobantes.append(comprobante)
+    return comprobantes
+
+def list_statusless_comprobante() -> list:
+    query = """
+        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
+	    FROM public.view_comprobantes_sin_estado;
+    """
+    records = connection._fetch_all(query=query)
+
+    comprobantes = []
+    for record in records:
+        comprobante = Comprobante(id=record[0],
+                              ruc=record[1],
+                              fecha_emision=record[2],
+                              serie=record[3],
+                              numero=record[4],
+                              monto=record[5])
         comprobantes.append(comprobante)
     return comprobantes

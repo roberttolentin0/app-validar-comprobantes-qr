@@ -10,7 +10,7 @@ class Comprobante:
     serie: str
     numero: int
     monto: float
-    id_tipo_comprobante: int
+    id_tipo_comprobante: Optional[int] = None
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
