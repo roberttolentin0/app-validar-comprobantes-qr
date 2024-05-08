@@ -1,8 +1,11 @@
 from typing import List
 
+from ..constans import CONDICION_DOMICILIO_CONTRIBUYENTE
+from ..constans import ESTADO_COMPROBANTE
+from ..constans import ESTADO_CONTRIBUYENTE
 from ..database import db_comprobante
 from ..models.comprobanteModel import Comprobante
-from ..helpers import helper
+from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from ..services.validar_comprobante_sunat import validar_comprobante
 
 
@@ -15,6 +18,17 @@ def create(comprobante_: Comprobante) -> Comprobante:
 def lists() -> List[Comprobante]:
     return db_comprobante.list_all()
 
+def list_with_status() -> List[ViewComprobanteEstados]:
+    comprobantes_estados = db_comprobante.list_all_with_status()
+    for comprobante in comprobantes_estados:
+        # Mapea el estado del comprobante
+        comprobante.estado_comprobante = ESTADO_COMPROBANTE.get(str(comprobante.estado_comprobante), '')
+        # Mapea el estado del RUC
+        comprobante.estado_ruc = ESTADO_CONTRIBUYENTE.get(str(comprobante.estado_ruc), '')
+        # Mapea la condición de domicilio del contribuyente
+        comprobante.cod_domiciliaria_ruc = CONDICION_DOMICILIO_CONTRIBUYENTE.get(str(comprobante.cod_domiciliaria_ruc), '')
+
+    return comprobantes_estados
 
 def validar_en_sunat() -> list:
     estados_sunat = []

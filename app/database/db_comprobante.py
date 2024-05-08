@@ -3,8 +3,9 @@ from datetime import datetime
 from typing import List
 
 from .db_connection import DBConnection
-# from ..models.models import Contact
+
 from ..models.comprobanteModel import Comprobante
+from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 
 connection = DBConnection()
 peru_timezone = pytz.timezone('America/Lima')
@@ -59,10 +60,36 @@ def list_all() -> List[Comprobante]:
         comprobantes.append(comprobante)
     return comprobantes
 
+def list_all_with_status() -> List[ViewComprobanteEstados]:
+    print('Entro list all status')
+    query = """
+        SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones
+	    FROM public.view_comprobantes_con_estados;
+    """
+    records = connection._fetch_all(query=query)
+
+    comprobantes = []
+    for record in records:
+        comprobante = ViewComprobanteEstados(
+                                id=record[0],
+                                ruc=record[1],
+                                fecha_emision=record[2],
+                                serie=record[3],
+                                numero=record[4],
+                                monto=record[5],
+                                tipo_comprobante=record[6],
+                                estado_comprobante=record[7],
+                                estado_ruc=record[8],
+                                cod_domiciliaria_ruc=record[9],
+                                observaciones=record[10])
+        comprobantes.append(comprobante)
+    return comprobantes
+
+
 def list_statusless_comprobante() -> list:
     query = """
         SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
-	    FROM public.view_comprobantes_sin_estado;
+	    FROM public.view_comprobantes_sin_estados;
     """
     records = connection._fetch_all(query=query)
 
