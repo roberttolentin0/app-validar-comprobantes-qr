@@ -14,7 +14,7 @@
       </button>
     </h2>
     <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
+      <div class="accordion-body text-center p-2">
         <form id="formDataComprobante" class="row g-2">
           <div class="col-md-6">
             <!-- <label for="rucEmisor" class="form-label">RUC Emisor</label> -->
@@ -22,7 +22,7 @@
           </div>
           <div class="col-md-6">
             <select id="tipoComprobante" class="form-select">
-              <option>Seleccionar Tipo Comprobante</option>
+              <option>Tipo Comprobante</option>
               <option value="01">Factura</option>
               <option value="03">Boleta de venta</option>
               <option value="07">Nota de crédito</option>
@@ -33,10 +33,10 @@
               <div class="col-5">
                 <input type="text" class="form-control" id="serie" placeholder="Serie">
               </div>
-              <div class="col-2">
+              <div class="col-1">
                 -
               </div>
-              <div class="col-5">
+              <div class="col-6">
                 <input type="text" class="form-control" id="numero" placeholder="Número">
               </div>
             </div>
@@ -47,7 +47,7 @@
                 <input type="date" class="form-control" id="fechaEmision" placeholder="Fecha emisión">
               </div>
               <div class="col-6">
-                <input type="number" class="form-control" id="monto" placeholder="Monto">
+                <input type="number" step="any" class="form-control" id="monto" placeholder="Monto">
               </div>
             </div>
           </div>

@@ -16,7 +16,7 @@ def home():
     comprobantes_dict = [comprobante.to_json() for comprobante in comprobantes_list]
     print(comprobantes_list)
     parameters = {
-        "title": "Lista de comprobantes",
+        "title": "Validación de comprobantes con SUNAT",
         "description": "Vista con todos los comprobantes a validar",
         "comprobantes": comprobantes_dict
     }
