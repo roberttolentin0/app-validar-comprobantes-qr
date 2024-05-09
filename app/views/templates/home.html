@@ -14,10 +14,12 @@
 {% block content %}
     <!-- Titulo de página -->
     <!-- Form para ingresar comprobantes -->
-    {% include 'form.html '%}
+    <div class="container p-3 rounded shadow">
+        {% include 'form.html '%}
+    </div>
     <!-- Tabla de comprobantes -->
-    <div>
-        <h1>{{title}}</h1>
+    <div class="my-4 text-center">
+        <h3>{{title}}</h1>
     </div>
     <div class="mx-auto">
         {% include 'table_comprobantes.html' %}

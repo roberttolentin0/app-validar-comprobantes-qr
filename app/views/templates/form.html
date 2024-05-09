@@ -1,0 +1,62 @@
+<form id="formQr" class="row g-2 mb-4">
+  <div class="col-12">
+    <label for="codigoQR" class="form-label">Leer código QR</label>
+    <input type="text" class="form-control" id="codigoQr">
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar QR</button>
+</form>
+<hr />
+<div class="accordion accordion-flush" id="accordionFlushExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        Formulario para ingreso manual del comprobante
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <form id="formDataComprobante" class="row g-2">
+          <div class="col-md-6">
+            <!-- <label for="rucEmisor" class="form-label">RUC Emisor</label> -->
+            <input type="text" class="form-control" id="rucEmisor" placeholder="Ruc del emisor">
+          </div>
+          <div class="col-md-6">
+            <select id="tipoComprobante" class="form-select">
+              <option>Seleccionar Tipo Comprobante</option>
+              <option value="01">Factura</option>
+              <option value="03">Boleta de venta</option>
+              <option value="07">Nota de crédito</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <div class="row text-center">
+              <div class="col-5">
+                <input type="text" class="form-control" id="serie" placeholder="Serie">
+              </div>
+              <div class="col-2">
+                -
+              </div>
+              <div class="col-5">
+                <input type="text" class="form-control" id="numero" placeholder="Número">
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="row text-center">
+              <div class="col-6">
+                <input type="date" class="form-control" id="fechaEmision" placeholder="Fecha emisión">
+              </div>
+              <div class="col-6">
+                <input type="number" class="form-control" id="monto" placeholder="Monto">
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary">Consultar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
