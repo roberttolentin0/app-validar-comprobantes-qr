@@ -18,7 +18,7 @@ def home():
     parameters = {
         "title": "Lista de comprobantes",
         "description": "Vista con todos los comprobantes a validar",
-        "data": comprobantes_dict
+        "comprobantes": comprobantes_dict
     }
 
     return render_template("home.html", nav=nav, **parameters)
