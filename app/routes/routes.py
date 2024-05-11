@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
 from ..controllers import comprobantes_controller
+from ..utils.DateFormat import DateFormat
 
 global_scope = Blueprint("views", __name__)
 
@@ -13,6 +14,9 @@ def home():
     """Landing page route."""
     print('Homeee')
     comprobantes_list = comprobantes_controller.list_with_status()
+    for comprobante in comprobantes_list:
+        comprobante.fecha_emision = DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision)
+
     comprobantes_dict = [comprobante.to_json() for comprobante in comprobantes_list]
     print(comprobantes_list)
     parameters = {
