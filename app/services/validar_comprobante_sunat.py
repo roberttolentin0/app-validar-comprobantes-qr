@@ -14,81 +14,97 @@ RUC = os.getenv('RUC')
 CLIENT_ID = os.getenv('CLIENT_ID_SOL')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET_SOL')
 
+class TokenSunat():
+    def __init__(self) -> None:
+        print('INIT TOKEN Sunat')
 
-def get_token():
-    url = f"https://api-seguridad.sunat.gob.pe/v1/clientesextranet/{CLIENT_ID}/oauth2/token/"
-    payload = f'grant_type=client_credentials&scope=https%3A%2F%2Fapi.sunat.gob.pe%2Fv1%2Fcontribuyente%2Fcontribuyentes&client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}'
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
-    response_token = requests.post(url, headers=headers, data=payload)
+    def _decode_token(self, token):
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            return payload
+        except ExpiredSignatureError:
+            print("El token ha expirado.")
+            return None
+        except InvalidTokenError:
+            print("El token es inválido.")
+            return None
 
-    if response_token.status_code == 200:
-        return response_token.json().get('access_token')
-    else:
-        print(f"Error al obtener el token. Código de estado: {response_token.status_code}")
-        print(response_token.text)
-        return None
-
-
-def decode_token(token):
-    try:
-        payload = jwt.decode(token, options={"verify_signature": False})
-        return payload
-    except ExpiredSignatureError:
-        print("El token ha expirado.")
-        return None
-    except InvalidTokenError:
-        print("El token es inválido.")
-        return None
-
-
-def expired_token(payload):
-    if payload:
-        expiracion = payload.get("exp", 0)
-        if expiracion > 0:
-            exp_timestamp = datetime.utcfromtimestamp(expiracion)
-            curr_date = datetime.utcnow()
-            expired_token = exp_timestamp < curr_date
-            # print('entro expired_token', expired_token, exp_timestamp, curr_date)
-            if expired_token:
-                print("El token ha expirado.")
+    def _expired_token(self, payload):
+        if payload:
+            expiracion = payload.get("exp", 0)
+            if expiracion > 0:
+                exp_timestamp = datetime.utcfromtimestamp(expiracion)
+                curr_date = datetime.utcnow()
+                expired_token = exp_timestamp < curr_date
+                # print('entro expired_token', expired_token, exp_timestamp, curr_date)
+                if expired_token:
+                    print("El token ha expirado.")
+                else:
+                    print("El token es válido hasta:", exp_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
+                return expired_token
             else:
-                print("El token es válido hasta:", exp_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
-            return expired_token
+                print("El token no incluye información de expiración.")
         else:
-            print("El token no incluye información de expiración.")
-    else:
-        print('Sin payload', payload)
+            print('Sin payload', payload)
+
+    def get_token_sunat(self):
+        url = f"https://api-seguridad.sunat.gob.pe/v1/clientesextranet/{CLIENT_ID}/oauth2/token/"
+        payload = f'grant_type=client_credentials&scope=https%3A%2F%2Fapi.sunat.gob.pe%2Fv1%2Fcontribuyente%2Fcontribuyentes&client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+        response_token = requests.post(url, headers=headers, data=payload)
+
+        if response_token.status_code == 200:
+            return response_token.json().get('access_token')
+        else:
+            print(f"Error al obtener el token. Código de estado: {response_token.status_code}")
+            print(response_token.text)
+            return None
+
+    def update_token_in_json(self):
+        print('-- update_token_in_json')
+        token = self.get_token_sunat()
+        # Guardar el token en un archivo JSON
+        data = {"token": token}
+        with open('app\services\data_token.json', 'w') as json_file:
+            json.dump(data, json_file)
+
+    def is_active_token(self, token):
+        payload = self._decode_token(token)
+        if payload is None:
+            return False
+        return not self._expired_token(payload)
+
+    def get_token_from_json(self):
+        # Cargar el token desde el archivo JSON
+        try:
+            # Ruta al directorio static de tu aplicación Django
+            directorio_static = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services')
+            ruta_json = os.path.join(directorio_static, 'data_token.json')
+            with open(ruta_json, 'r') as json_file:
+                data = json.load(json_file)
+                return data["token"]
+        except FileNotFoundError as e:
+            print(e)
+            return None
+
+    def get_token(self):
+        ''' @return: Bearer xyzabcde... '''
+        # Cargar el token desde el archivo JSON
+        token = self.get_token_from_json()
+        try:
+            if token == '' or not self.is_active_token(token):
+                self.update_token_in_json()
+                token = self.get_token_from_json()
+                print('T'*10, token)
+            return f'Bearer {token}'
+        except FileNotFoundError as e:
+            print(e)
+            return None
 
 
-def is_active_token(token):
-    payload = decode_token(token)
-    if payload is None:
-        return False
-    return not expired_token(payload)
-
-
-def update_token_in_json():
-    print('-- update_token_in_json')
-    token = get_token()
-    # Guardar el token en un archivo JSON
-    data = {"token": token}
-    with open('app\services\data_token.json', 'w') as json_file:
-        json.dump(data, json_file)
-
-
-def get_token_from_json():
-    # Cargar el token desde el archivo JSON
-    try:
-        with open('app\services\data_token.json', 'r') as json_file:
-            data = json.load(json_file)
-            return data["token"]
-    except FileNotFoundError as e:
-        print(e)
-        return None
-
-
+token_sunat = TokenSunat()
 @measure_time
 def validar_comprobante(data_comprobante):
     """Validar estado de comprobante en SUNAT
@@ -106,13 +122,7 @@ def validar_comprobante(data_comprobante):
     Return: Respuesta de la API Sunat
     """
     print(data_comprobante)
-    token = get_token_from_json()
-    # print('token', token, is_active_token(token))
-    if token == '' or not is_active_token(token):
-        update_token_in_json()
-        token = get_token_from_json()
-
-    auth_token = f'Bearer {token}'
+    auth_token = token_sunat.get_token()
     url = f'https://api.sunat.gob.pe/v1/contribuyente/contribuyentes/{RUC}/validarcomprobante'
     payload = json.dumps(data_comprobante)
     headers = {
