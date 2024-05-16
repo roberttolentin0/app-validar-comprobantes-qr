@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 
 from .db_connection import DBConnection
-
 from ..models.comprobanteModel import Comprobante
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 

@@ -4,7 +4,9 @@ from ..constans import CONDICION_DOMICILIO_CONTRIBUYENTE
 from ..constans import ESTADO_COMPROBANTE
 from ..constans import ESTADO_CONTRIBUYENTE
 from ..database import db_comprobante
+from ..database import db_tipo_comprobante
 from ..models.comprobanteModel import Comprobante
+from ..models.tipoComprobanteModel import TipoComprobante
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from ..services.validar_comprobante_sunat import validar_comprobante
 
@@ -29,6 +31,17 @@ def list_with_status() -> List[ViewComprobanteEstados]:
         comprobante.cod_domiciliaria_ruc = CONDICION_DOMICILIO_CONTRIBUYENTE.get(str(comprobante.cod_domiciliaria_ruc), '')
 
     return comprobantes_estados
+
+def list_tipo_comprobante() -> List[TipoComprobante]:
+    return db_tipo_comprobante.list_all_type()
+
+def get_id_tipo_comprobante(cod_comprobante) -> int:
+    tipos = db_tipo_comprobante.list_all_type()
+    print(tipos)
+    for tipo in tipos:
+        if tipo.cod_comprobante == cod_comprobante:
+            return tipo.id
+    return None
 
 def validar_en_sunat() -> list:
     estados_sunat = []

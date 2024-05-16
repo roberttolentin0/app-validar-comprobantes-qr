@@ -1,4 +1,4 @@
-from app import init_app
+from src import init_app
 
 app = init_app()
 

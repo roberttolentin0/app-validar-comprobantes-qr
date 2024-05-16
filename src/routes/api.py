@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, redirect, url_for
 
 from ..controllers import comprobantes_controller
 from ..models.comprobanteModel import Comprobante
+from ..constans import TIPO_COMPROBANTE
 
 api_scope = Blueprint("api", __name__)
 
@@ -12,24 +13,41 @@ def get_list():
     print(comprobantes_list)
     return jsonify(comprobantes_dict)
 
+@api_scope.route('/create_comprobante', methods=['POST'])
+def create_comprobante_qr():
+    data = request.form
+    print('Crear permiso QR', data)
+    if request.method == 'POST':
+        data_qr = request.form['dataQr']
+        if data_qr is not None:
+            print('AAA'*10);
+            parse_data_qr = data_qr.split('|')
+            print('parse_data_qr', parse_data_qr)
+            data_comprobante = {
+                'ruc': parse_data_qr[0],
+                'id_tipo_comprobante' : comprobantes_controller.get_id_tipo_comprobante(parse_data_qr[1]),
+                'serie': parse_data_qr[2],
+                'numero': parse_data_qr[3],
+                'monto': parse_data_qr[5],
+                'fecha_emision': parse_data_qr[6]
+            }
+
+            comprobante = Comprobante(
+                ruc=data_comprobante['ruc'],
+                fecha_emision=data_comprobante['fecha_emision'],
+                serie=data_comprobante['serie'],
+                numero=data_comprobante['numero'],
+                monto=data_comprobante['monto'],
+                id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
+            # Create
+            new_comprobante = comprobantes_controller.create(comprobante)
+            print('new_comprobante', new_comprobante)
+            return jsonify({'message': 'success', 'new_id': new_comprobante.id}), 200
+
 @api_scope.route('/comprobante', methods=['POST'])
-def create():
+def create_comprobante():
     print('Crear permiso', request.form)
     if request.method == 'POST':
-        # ruc = request.form['ruc']
-        # fecha_emision = request.form['fecha_emision']
-        # print('ruc_form', ruc)
-        # serie = request.form['serie']
-        # numero = request.form['numero']
-        # monto = request.form['monto']
-        # id_tipo_comprobante = request.form['id_tipo_comprobante']
-        # comprobante_dict = Comprobante(
-        #     ruc=ruc,
-        #     fecha_emision=fecha_emision,
-        #     serie=serie, numero=numero,
-        #     monto=monto,
-        #     id_tipo_comprobante=id_tipo_comprobante)
-
         comprobante = Comprobante(
             ruc="20522199495",
             fecha_emision="30/11/2023",
