@@ -110,3 +110,41 @@ function renderRowOptions(id) {
           </div>
           `;
 }
+
+function validarComprobantes() {
+  let timerInterval;
+  // Agregar un spinner
+  Swal.fire({
+    title: "Auto close alert!",
+    html: "Validando <b></b> segundos.",
+    timer: 10000,
+    timerProgressBar: true,
+    didOpen: () => {
+      Swal.showLoading();
+      const timer = Swal.getPopup().querySelector("b");
+      timerInterval = setInterval(() => {
+        timer.textContent = `${Swal.getTimerLeft()}`;
+      }, 100);
+    },
+    willClose: () => {
+      clearInterval(timerInterval);
+      location.reload()
+    }
+  }).then((result) => {
+    /* Read more about handling dismissals below */
+    if (result.dismiss === Swal.DismissReason.timer) {
+      console.log("I was closed by the timer");
+    }
+  });
+  const url = '/api/validar/comprobantes'
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data)
+  })
+}

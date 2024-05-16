@@ -71,8 +71,9 @@ def validar_comprobantes():
     # Guardar estados de comrpobantes
     try:
         if request.method == 'POST':
+            print('Validando')
             estados_sunat = comprobantes_controller.validar_en_sunat()
-            print('Validado')
+            print('Validados')
             return jsonify({'message': 'success', 'data': estados_sunat}), 200
     except Exception as e:
         return jsonify({'message': "Error en validar comprobante"}), 500

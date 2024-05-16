@@ -62,32 +62,34 @@ class TokenSunat():
             print(response_token.text)
             return None
 
+    def get_ruta_token_json(self):
+        # Ruta al directorio services de tu aplicación
+        directorio_static = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services')
+        return os.path.join(directorio_static, 'data_token.json')
+
     def update_token_in_json(self):
         print('-- update_token_in_json')
         token = self.get_token_sunat()
         # Guardar el token en un archivo JSON
         data = {"token": token}
-        with open('app\services\data_token.json', 'w') as json_file:
+        with open(self.get_ruta_token_json(), 'w') as json_file:
             json.dump(data, json_file)
+
+    def get_token_from_json(self):
+        # Cargar el token desde el archivo JSON
+        try:
+            with open(self.get_ruta_token_json(), 'r') as json_file:
+                data = json.load(json_file)
+                return data["token"]
+        except FileNotFoundError as e:
+            print(e)
+            return None
 
     def is_active_token(self, token):
         payload = self._decode_token(token)
         if payload is None:
             return False
         return not self._expired_token(payload)
-
-    def get_token_from_json(self):
-        # Cargar el token desde el archivo JSON
-        try:
-            # Ruta al directorio static de tu aplicación Django
-            directorio_static = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services')
-            ruta_json = os.path.join(directorio_static, 'data_token.json')
-            with open(ruta_json, 'r') as json_file:
-                data = json.load(json_file)
-                return data["token"]
-        except FileNotFoundError as e:
-            print(e)
-            return None
 
     def get_token(self):
         ''' @return: Bearer xyzabcde... '''
