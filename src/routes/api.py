@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, redirect, url_for
 
 from ..controllers import comprobantes_controller
 from ..models.comprobanteModel import Comprobante
-from ..constans import TIPO_COMPROBANTE
 
 api_scope = Blueprint("api", __name__)
 

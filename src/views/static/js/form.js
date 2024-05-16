@@ -1,4 +1,5 @@
 const formQr = document.getElementById("formQr");
+const inputDataQr = document.getElementById("dataQr");
 var clickSubmit = false;
 
 formQr.addEventListener("submit", (event) => {
@@ -10,7 +11,7 @@ formQr.addEventListener("submit", (event) => {
   }
   infoAutoClose("Agregando, Esperar...", 3000);
   clickSubmit = true;
-  const dataQr = document.getElementById("dataQr").value.trim();
+  const dataQr = inputDataQr.value.trim();
   // const reasonSinSaltos = textAreaReason.value.trim().replace(/\n/g, ' ');
   if (dataQr == "") {
     console.log("Verificar QR");
@@ -47,6 +48,7 @@ formQr.addEventListener("submit", (event) => {
       // SIMULAR UN POS.
       // Se puede poner un spinner mientras se agrega el comprobante
       alert('Agregado')
+      inputDataQr.value = "";
       location.reload()
       clickSubmit = false
     })
