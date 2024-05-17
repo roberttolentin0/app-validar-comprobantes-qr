@@ -8,14 +8,17 @@ from ..database import db_tipo_comprobante
 from ..models.comprobanteModel import Comprobante
 from ..models.tipoComprobanteModel import TipoComprobante
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
+from ..routes.errors import ComprobanteAlreadyExistsError
 from ..services.validar_comprobante_sunat import validar_comprobante
-
+from ..utils.DateFormat import DateFormat
 
 def create(comprobante_: Comprobante) -> Comprobante:
-    # comprobante = helper.format_name(comprobante_)
-    # helper.validate_comprobante(comprobante)
+    '''Crear comprobante si no existe'''
+    # Verificar si ya existe el comprobante
+    comprobante = db_comprobante.get_comprobante(comprobante_)
+    if comprobante:
+        raise ComprobanteAlreadyExistsError(comprobante)
     return db_comprobante.create(comprobante_)
-
 
 def lists() -> List[Comprobante]:
     return db_comprobante.list_all()
@@ -55,20 +58,11 @@ def validar_en_sunat() -> list:
             "codComp": "01",
             "numeroSerie": comprobante.serie,
             "numero": comprobante.numero,
-            "fechaEmision": "26/11/2023", # comprobante.fecha_emision,
-            "monto": comprobante.monto
+            "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
+            "monto": comprobante.monto # "22725.00"
         }
-        # data_comprobante = {
-        #         "numRuc": "20522199495",
-        #         "codComp": "01",
-        #         "numeroSerie": "F001",
-        #         "numero": "55285",
-        #         "fechaEmision": "30/11/2023",
-        #         "monto": "22725.00"
-        # }
-
         estado_sunat = validar_comprobante(data_comprobante)
         estados_sunat.append(estado_sunat)
         # Validar comprobantes con la API Sunat
-    print('comprobantes_por_validar', len(comprobantes_sin_estado), estados_sunat, len(estados_sunat))
+    print('-- Comprobantes validados: ', len(comprobantes_sin_estado), estados_sunat, len(estados_sunat))
     return estados_sunat

@@ -33,11 +33,14 @@ formQr.addEventListener("submit", (event) => {
     method: "POST",
     body: formData,
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
-        console.log(response, response.json());
-        throw new Error(`La solicitud no fue exitosa`);
+        return response.json().then(errorData => {
+          const error = new Error('Respuesta no satisfactoria');
+          error.data = errorData;
+          throw error;
+        })
       }
       return response.json;
     })
@@ -53,8 +56,16 @@ formQr.addEventListener("submit", (event) => {
       clickSubmit = false
     })
     .catch((error) => {
-      console.error(error);
-      Swal.fire("No se creo!", `${error}`, "error");
-      clickSubmit = false
+      let errorMessage;
+      if (error.data){
+        // Error del servidor
+        errorMessage = `Error del servidor: ${error.data.message || JSON.stringify(error.data)}`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      console.error(errorMessage);
+      Swal.fire("No se creo!", errorMessage, "error");
+      clickSubmit = false;
     })
 });

@@ -37,6 +37,28 @@ def create(comprobante: Comprobante) -> Comprobante:
     comprobante_dict["id"] = id_
     return Comprobante(**comprobante_dict)
 
+def get_comprobante(comprobante: Comprobante) -> Comprobante:
+    print('Obtener comprobante')
+    query = """
+        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
+	    FROM public.comprobantes WHERE ruc = %(ruc)s AND serie = %(serie)s AND numero = %(numero)s AND monto = %(monto)s
+    """
+    parameters = {}
+    parameters['ruc'] = comprobante.ruc
+    parameters['serie'] = comprobante.serie
+    parameters['numero'] = comprobante.numero
+    parameters['monto'] = comprobante.monto
+    record = connection._fetch_one(query=query, parameters=parameters)
+    if record is not None:
+        return Comprobante(id=record[0],
+                        ruc=record[1],
+                        fecha_emision=record[2],
+                        serie=record[3],
+                        numero=record[4],
+                        monto=record[5],
+                        id_tipo_comprobante=record[8],
+                        created_at=record[7])
+    return None
 
 def list_all() -> List[Comprobante]:
     print('Entro list all')
