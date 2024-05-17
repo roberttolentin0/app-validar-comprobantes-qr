@@ -1,7 +1,10 @@
+import re
 from flask import Blueprint, request, jsonify, redirect, url_for
 
 from ..controllers import comprobantes_controller
 from ..models.comprobanteModel import Comprobante
+from ..routes.errors import ComprobanteAlreadyExistsError
+from ..utils.DateFormat import DateFormat
 
 api_scope = Blueprint("api", __name__)
 
@@ -16,32 +19,38 @@ def get_list():
 def create_comprobante_qr():
     data = request.form
     print('Crear permiso QR', data)
-    if request.method == 'POST':
-        data_qr = request.form['dataQr']
-        if data_qr is not None:
-            print('AAA'*10);
-            parse_data_qr = data_qr.split('|')
-            print('parse_data_qr', parse_data_qr)
-            data_comprobante = {
-                'ruc': parse_data_qr[0],
-                'id_tipo_comprobante' : comprobantes_controller.get_id_tipo_comprobante(parse_data_qr[1]),
-                'serie': parse_data_qr[2],
-                'numero': parse_data_qr[3],
-                'monto': parse_data_qr[5],
-                'fecha_emision': parse_data_qr[6]
-            }
+    try:
+        if request.method == 'POST':
+            data_qr = request.form['dataQr']
+            if data_qr is not None:
+                parsed_data_qr = re.split(r'\||\]', data_qr) # Para separaciones por '|' y ']'
+                print('parse_data_qr', parsed_data_qr)
+                fecha = DateFormat.find_and_format_date(data=data_qr)
+                data_comprobante = {
+                    'ruc': parsed_data_qr[0],
+                    'id_tipo_comprobante' : comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1]),
+                    'serie': parsed_data_qr[2],
+                    'numero': parsed_data_qr[3],
+                    'monto': parsed_data_qr[5],
+                    'fecha_emision': fecha
+                }
 
-            comprobante = Comprobante(
-                ruc=data_comprobante['ruc'],
-                fecha_emision=data_comprobante['fecha_emision'],
-                serie=data_comprobante['serie'],
-                numero=data_comprobante['numero'],
-                monto=data_comprobante['monto'],
-                id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
-            # Create
-            new_comprobante = comprobantes_controller.create(comprobante)
-            print('new_comprobante', new_comprobante)
-            return jsonify({'message': 'success', 'new_id': new_comprobante.id}), 200
+                comprobante = Comprobante(
+                    ruc=data_comprobante['ruc'],
+                    fecha_emision=data_comprobante['fecha_emision'],
+                    serie=data_comprobante['serie'],
+                    numero=data_comprobante['numero'],
+                    monto=data_comprobante['monto'],
+                    id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
+                # Create
+                new_comprobante = comprobantes_controller.create(comprobante)
+                print('new_comprobante', new_comprobante)
+                return jsonify({'message': 'success', 'new_id': new_comprobante.id}), 200
+    except ComprobanteAlreadyExistsError as e:
+        return jsonify({'message': f"Error: {e}"}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({'message': "Error al crear el comprobante"}), 500
 
 @api_scope.route('/comprobante', methods=['POST'])
 def create_comprobante():
