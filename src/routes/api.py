@@ -44,8 +44,9 @@ def create_comprobante_qr():
                     id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
                 # Create
                 new_comprobante = comprobantes_controller.create(comprobante)
-                print('new_comprobante', new_comprobante)
-                return jsonify({'message': 'success', 'new_id': new_comprobante.id}), 200
+                comprobante_with_status = comprobantes_controller.get_comprobante_status_by_id(new_comprobante.id)
+                print('new_comprobante', comprobante_with_status)
+                return jsonify({'message': 'success', 'new_comprobante': comprobante_with_status.to_json()}), 200
     except ComprobanteAlreadyExistsError as e:
         return jsonify({'message': f"Error: {e}"}), 500
     except Exception as e:
@@ -74,15 +75,13 @@ def create_comprobante():
 
 @api_scope.route('/validar/comprobantes', methods=['POST'])
 def validar_comprobantes():
-    # obtener los comprobantes sin validar
-    # crear una lista con los comprobantes sin validar
-    # Recorrrer la lista para validar comprobantes
-    # Guardar estados de comrpobantes
     try:
         if request.method == 'POST':
-            print('Validando')
+            print('Validando...')
             estados_sunat = comprobantes_controller.validar_en_sunat()
-            print('Validados')
+            print('estados_sunat', estados_sunat)
+            if not estados_sunat:
+                return jsonify({'message': "No hay comprobantes a validar"}), 404
             return jsonify({'message': 'success', 'data': estados_sunat}), 200
     except Exception as e:
         return jsonify({'message': "Error en validar comprobante"}), 500

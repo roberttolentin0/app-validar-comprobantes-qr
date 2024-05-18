@@ -9,7 +9,7 @@ formQr.addEventListener("submit", (event) => {
     infoAutoClose("Agregando, Esperar...", 2500);
     return;
   }
-  infoAutoClose("Agregando, Esperar...", 3000);
+  infoAutoClose("Agregando, Esperar...");
   clickSubmit = true;
   const dataQr = inputDataQr.value.trim();
   // const reasonSinSaltos = textAreaReason.value.trim().replace(/\n/g, ' ');
@@ -42,17 +42,16 @@ formQr.addEventListener("submit", (event) => {
           throw error;
         })
       }
-      return response.json;
+      return response.json();
     })
-    .then((responseJson) => {
-      console.log(responseJson, responseJson.ok, responseJson.message);
-      // Notificación
-      // buscar la forma de q solo se actualice la tabla y no toda la página y se limpie el input QR
+    .then(responseJson => {
+      console.log("responseJson")
+      console.log(responseJson);
       // SIMULAR UN POS.
       // Se puede poner un spinner mientras se agrega el comprobante
-      alert('Agregado')
-      inputDataQr.value = "";
-      location.reload()
+      const comprobante = responseJson.new_comprobante
+      addComprobanteToTable(comprobante)
+      successAutoClose("Comprobante agregado", 500);
       clickSubmit = false
     })
     .catch((error) => {
@@ -68,4 +67,5 @@ formQr.addEventListener("submit", (event) => {
       Swal.fire("No se creo!", errorMessage, "error");
       clickSubmit = false;
     })
+    .finally(() => inputDataQr.value = "");
 });

@@ -8,7 +8,7 @@
 	<link href="https://cdn.datatables.net/datetime/1.5.2/css/dataTables.dateTime.min.css" rel="stylesheet">
 	<link href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.min.css" rel="stylesheet">
 	<link href="https://cdn.datatables.net/searchpanes/2.3.1/css/searchPanes.dataTables.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -24,6 +24,7 @@
     <div class="mx-auto my-4">
         {% include 'table_comprobantes.html' %}
     </div>
+    <div id="jsLoading" class="" role="status"></div>
 {% endblock %}
 
 {% block script %}

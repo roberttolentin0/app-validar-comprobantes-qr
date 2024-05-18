@@ -1,8 +1,5 @@
 from typing import List
 
-from ..constans import CONDICION_DOMICILIO_CONTRIBUYENTE
-from ..constans import ESTADO_COMPROBANTE
-from ..constans import ESTADO_CONTRIBUYENTE
 from ..database import db_comprobante
 from ..database import db_tipo_comprobante
 from ..database import db_estado_comprobante
@@ -12,6 +9,7 @@ from ..models.estadoComprobanteModel import EstadoComprobante
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from ..routes.errors import ComprobanteAlreadyExistsError
 from ..services.validar_comprobante_sunat import validar_comprobante
+from ..utils.helpers import parsed_comprobante_with_status
 from ..utils.DateFormat import DateFormat
 
 
@@ -29,17 +27,15 @@ def lists() -> List[Comprobante]:
 def list_with_status() -> List[ViewComprobanteEstados]:
     comprobantes_estados = db_comprobante.list_all_with_status()
     for comprobante in comprobantes_estados:
-        # Mapea el estado del comprobante
-        comprobante.estado_comprobante = ESTADO_COMPROBANTE.get(str(comprobante.estado_comprobante), '')
-        # Mapea el estado del RUC
-        comprobante.estado_ruc = ESTADO_CONTRIBUYENTE.get(str(comprobante.estado_ruc), '')
-        # Mapea la condición de domicilio del contribuyente
-        comprobante.cod_domiciliaria_ruc = CONDICION_DOMICILIO_CONTRIBUYENTE.get(str(comprobante.cod_domiciliaria_ruc), '')
-
+        comprobante = parsed_comprobante_with_status(comprobante)
     return comprobantes_estados
 
 def list_tipo_comprobante() -> List[TipoComprobante]:
     return db_tipo_comprobante.list_all_type()
+
+def get_comprobante_status_by_id(id) -> ViewComprobanteEstados:
+    comprobante = db_comprobante.get_comprobante_with_status(id)
+    return parsed_comprobante_with_status(comprobante)
 
 def get_id_tipo_comprobante(cod_comprobante) -> int:
     tipos = db_tipo_comprobante.list_all_type()
@@ -73,7 +69,7 @@ def validar_en_sunat() -> list:
                     estado_ruc=estado_sunat.get('estadoRuc', None),
                     cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
                 )
-                print('>>>>>>> estado_comprobante', estado_comprobante)
+                # print('>>>>>>> estado_comprobante', estado_comprobante)
                 db_estado_comprobante.create(estado_comprobante)
             estados_sunat.append(estado_sunat)
             # Validar comprobantes con la API Sunat

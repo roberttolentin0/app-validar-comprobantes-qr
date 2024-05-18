@@ -83,7 +83,6 @@ class Connection:
     def _fetch_lastrow_id(self, query: str, parameters: Optional[List[str]] = None) -> int:
         if parameters is None:
             parameters = []
-        print('query', query, parameters)
         with self.__get_cursor() as cursor:
             cursor.execute(query, parameters)
             return cursor.fetchone()[0]

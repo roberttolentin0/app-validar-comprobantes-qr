@@ -1,4 +1,5 @@
 console.log("comprobantes");
+const loading = document.getElementById("jsLoading");
 const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
@@ -52,8 +53,7 @@ const tablaComprobantes = new DataTable(
   .adjust()
   .responsive.recalc();
 
-/** Agregar filas */
-comprobantes.forEach(function (comprobante) {
+function addComprobanteToTable(comprobante) {
   tablaComprobantes.row
     .add([
       `<span style="font-size: 0.7rem"}>${comprobante.id}</span>`,
@@ -69,7 +69,10 @@ comprobantes.forEach(function (comprobante) {
       renderRowOptions(comprobante.id),
     ])
     .draw();
-});
+}
+
+/** Agregar filas */
+comprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
 
 function renderRowStatus(status) {
   const colorStatus = {
@@ -112,39 +115,44 @@ function renderRowOptions(id) {
 }
 
 function validarComprobantes() {
-  let timerInterval;
-  // Agregar un spinner
-  Swal.fire({
-    title: "Auto close alert!",
-    html: "Validando <b></b> segundos.",
-    timer: 10000,
-    timerProgressBar: true,
-    didOpen: () => {
-      Swal.showLoading();
-      const timer = Swal.getPopup().querySelector("b");
-      timerInterval = setInterval(() => {
-        timer.textContent = `${Swal.getTimerLeft()}`;
-      }, 100);
-    },
-    willClose: () => {
-      clearInterval(timerInterval);
-      location.reload()
-    }
-  }).then((result) => {
-    /* Read more about handling dismissals below */
-    if (result.dismiss === Swal.DismissReason.timer) {
-      console.log("I was closed by the timer");
-    }
-  });
-  const url = '/api/validar/comprobantes'
+  loading.classList.add("loading");
+  const url = "/api/validar/comprobantes";
   fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
   })
-  .then(response => response.json())
-  .then(data => {
-    console.log(data)
-  })
+    .then((response) => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then((errorData) => {
+          const error = new Error("Respuesta no satisfactoria");
+          error.data = errorData;
+          throw error;
+        });
+      }
+      response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      Swal.fire("Validaciones completadas", "", "success").then(() => {
+        location.reload();
+      });
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data) {
+        // Error del servidor
+        errorMessage = `Error del servidor: ${
+          error.data.message || JSON.stringify(error.data)
+        }`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      console.error(errorMessage);
+      Swal.fire("Error en la validación", errorMessage, "error");
+    })
+    .finally(() => loading.classList.remove("loading"));
 }
