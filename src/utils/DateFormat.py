@@ -1,9 +1,16 @@
 import datetime
+import pytz
 import re
 
 from datetime import datetime
 
+peru_timezone = pytz.timezone('America/Lima')
+
 class DateFormat():
+
+    @classmethod
+    def get_curr_time_peru(self):
+        return datetime.now(peru_timezone)
 
     @classmethod
     def convert_date_to_ddmmyy(self, date):

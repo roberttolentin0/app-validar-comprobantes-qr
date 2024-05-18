@@ -1,13 +1,17 @@
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
+
 
 @dataclass
 class EstadoComprobante():
-    id: int
-    estado_comprobante: str
-    estado_ruc: str
-    cod_domiciliaria_ruc: str
-    observaciones: str
     id_comprobante: int
+    estado_comprobante: Optional[str] = None
+    estado_ruc: Optional[str] = None
+    cod_domiciliaria_ruc: Optional[str] = None
+    observaciones: Optional[str] = None
+    id: Optional[int] = None
+    created_at: Optional[datetime] = None
 
     def to_json(self):
         return {

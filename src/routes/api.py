@@ -28,7 +28,7 @@ def create_comprobante_qr():
                 fecha = DateFormat.find_and_format_date(data=data_qr)
                 data_comprobante = {
                     'ruc': parsed_data_qr[0],
-                    'id_tipo_comprobante' : comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1]),
+                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1]),
                     'serie': parsed_data_qr[2],
                     'numero': parsed_data_qr[3],
                     'monto': parsed_data_qr[5],

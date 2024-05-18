@@ -1,15 +1,11 @@
-import pytz
-from datetime import datetime
 from typing import List
 
 from .db_connection import DBConnection
 from ..models.comprobanteModel import Comprobante
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
+from ..utils.DateFormat import DateFormat
 
 connection = DBConnection()
-peru_timezone = pytz.timezone('America/Lima')
-def get_curr_time_peru():
-    return datetime.now(peru_timezone)
 
 
 def create(comprobante: Comprobante) -> Comprobante:
@@ -29,7 +25,7 @@ def create(comprobante: Comprobante) -> Comprobante:
         RETURNING id
     """
     comprobante_dict = comprobante.to_json()
-    comprobante_dict['created_at'] = get_curr_time_peru()
+    comprobante_dict['created_at'] = DateFormat.get_curr_time_peru()
     print('comprobante_dict', comprobante_dict)
 
     id_ = connection._fetch_lastrow_id(query, comprobante_dict)
