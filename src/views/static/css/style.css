@@ -1,3 +1,7 @@
+body {
+  background-color: #f8f8fb;
+}
+
 /* Absolute Center Spinner */
 .loading {
   position: fixed;
@@ -137,4 +141,24 @@
 }
 .hidden {
   display: None;
+}
+
+.wrapper {
+  background-color: #fff;
+}
+
+/** Update Bootstrap**/
+.btn-success {
+  color: #fff;
+  background-color: #3ac47d;
+  border-color: #3ac47d;
+}
+.btn-success:hover {
+  opacity: 0.7;
+  background-color: #3ac47d;
+  border-color: #3ac47d;
+}
+.badge-success {
+  color: #fff;
+  background-color: #3ac47d;
 }

@@ -1,5 +1,6 @@
 const formQr = document.getElementById("formQr");
 const inputDataQr = document.getElementById("dataQr");
+const formDataComprobante = document.getElementById("formDataComprobante");
 var clickSubmit = false;
 
 formQr.addEventListener("submit", (event) => {

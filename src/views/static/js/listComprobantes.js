@@ -77,12 +77,12 @@ comprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
 function renderRowStatus(status) {
   const colorStatus = {
     "NO EXISTE": "badge text-bg-secondary",
-    ACEPTADO: "badge text-bg-success",
+    ACEPTADO: "badge badge-success",
     ANULADO: "badge text-bg-danger",
     // EstadoRuc
-    ACTIVO: "badge text-bg-success",
+    ACTIVO: "badge badge-success",
     // ConDomRuc
-    HABIDO: "badge text-bg-success",
+    HABIDO: "badge badge-success",
     default: "badge text-bg-secondary",
   };
   return `<span class='px-2 py-1 ${
@@ -92,7 +92,7 @@ function renderRowStatus(status) {
 
 function renderRowOptions(id) {
   const buttonValidar = `
-        <button onclick="aceptar(${id})" class="btn btn-light col-3 col-sm-4"">
+        <button onclick="validar(${id})" class="btn btn-light col-3 col-sm-4"">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </button>
     `;
@@ -112,6 +112,83 @@ function renderRowOptions(id) {
               ${buttonDetails} ${buttonValidar} ${buttonEliminar}
           </div>
           `;
+}
+
+function validar(id) {
+  Swal.fire({
+    title: "Validar comprobante",
+    text: "¿Está seguro que desea validar este comprobante?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#34d399",
+    cancelButtonColor: "#fca5a5",
+    confirmButtonText: "Validar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      validarComprobante(id);
+    }
+  });
+}
+
+function validarComprobante(id) {
+  loading.classList.add("loading");
+  const url = `/api/validar/comprobante`;
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then((errorData) => {
+          const error = new Error("Respuesta no satisfactoria");
+          error.data = errorData;
+          throw error;
+        });
+      }
+      response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      Swal.fire("Validacion completada", "", "success").then(() => {
+        location.reload();
+      });
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data) {
+        // Error del servidor
+        errorMessage = `Error del servidor: ${
+          error.data.message || JSON.stringify(error.data)
+        }`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      console.error(errorMessage);
+      Swal.fire("Error en la validación", errorMessage, "error");
+    })
+    .finally(() => loading.classList.remove("loading"));
+}
+
+function validarMasivamente() {
+  Swal.fire({
+    title: "¿Validar comprobantes?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#34d399",
+    cancelButtonColor: "#fca5a5",
+    confirmButtonText: "Validar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      validarComprobantes();
+    }
+  });
 }
 
 function validarComprobantes() {

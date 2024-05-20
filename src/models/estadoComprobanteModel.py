@@ -12,6 +12,7 @@ class EstadoComprobante():
     observaciones: Optional[str] = None
     id: Optional[int] = None
     created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     def to_json(self):
         return {

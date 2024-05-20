@@ -26,14 +26,36 @@ def create(comprobante: Comprobante) -> Comprobante:
     """
     comprobante_dict = comprobante.to_json()
     comprobante_dict['created_at'] = DateFormat.get_curr_time_peru()
-    print('comprobante_dict', comprobante_dict)
-
+    # print('comprobante_dict', comprobante_dict)
     id_ = connection._fetch_lastrow_id(query, comprobante_dict)
 
     comprobante_dict["id"] = id_
     return Comprobante(**comprobante_dict)
 
+def get_comprobante_by_id(_id) -> Comprobante:
+    ''' @params: id
+        @return: comprobante '''
+    query = """
+        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
+	    FROM public.comprobantes WHERE id = %(id)s
+    """
+    parameters = {'id': _id}
+
+    record = connection._fetch_one(query=query, parameters=parameters)
+    if record is not None:
+        return Comprobante(id=record[0],
+                        ruc=record[1],
+                        fecha_emision=record[2],
+                        serie=record[3],
+                        numero=record[4],
+                        monto=record[5],
+                        id_tipo_comprobante=record[8],
+                        created_at=record[7])
+    return None
+
 def get_comprobante(comprobante: Comprobante) -> Comprobante:
+    ''' @params: ruc, serie, numero, monto
+        @return: comprobante '''
     print('Obtener comprobante')
     query = """
         SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
