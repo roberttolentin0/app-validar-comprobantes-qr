@@ -22,6 +22,10 @@ def create(comprobante_: Comprobante) -> Comprobante:
     return db_comprobante.create(comprobante_)
 
 
+def delete_comprobante(comprobante_: Comprobante) -> Comprobante:
+    return db_comprobante.delete(comprobante_)
+
+
 def lists() -> List[Comprobante]:
     return db_comprobante.list_all()
 
@@ -36,8 +40,10 @@ def list_with_status() -> List[ViewComprobanteEstados]:
 def list_tipo_comprobante() -> List[TipoComprobante]:
     return db_tipo_comprobante.list_all_type()
 
+
 def get_comprobante_by_id(id) -> Comprobante:
     return db_comprobante.get_comprobante_by_id(id)
+
 
 def get_comprobante_status_by_id(id) -> ViewComprobanteEstados:
     comprobante = db_comprobante.get_comprobante_with_status(id)
@@ -62,28 +68,10 @@ def validar_en_sunat() -> list:
     for comprobante in comprobantes_sin_estado:
         print(comprobante.ruc)
         estado_sunat = validar_en_sunat_individual(comprobante)
-        # data_comprobante = {
-        #     "id": comprobante.id,
-        #     "numRuc": comprobante.ruc,
-        #     "codComp": "01",
-        #     "numeroSerie": comprobante.serie,
-        #     "numero": comprobante.numero,
-        #     "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision),  # "26/11/2023"
-        #     "monto": comprobante.monto  # "22725.00"
-        # }
-        # estado_sunat = validar_comprobante(data_comprobante)
-        # if estado_sunat is not None:
-        #     estado_comprobante = EstadoComprobante(
-        #         id_comprobante=estado_sunat['id'],
-        #         estado_comprobante=estado_sunat.get('estadoCp', None),
-        #         estado_ruc=estado_sunat.get('estadoRuc', None),
-        #         cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
-        #     )
-        #     # print('>>>>>>> estado_comprobante', estado_comprobante)
-        #     db_estado_comprobante.create(estado_comprobante)
         estados_sunat.append(estado_sunat)
         # Validar comprobantes con la API Sunat
-    print('-- Comprobantes validados: ', len(comprobantes_sin_estado), estados_sunat, len(estados_sunat))
+    print('-- Comprobantes validados: ', len(comprobantes_sin_estado),
+          estados_sunat, len(estados_sunat))
     return estados_sunat
 
 
@@ -100,16 +88,17 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     }
     estado_sunat = validar_comprobante(data_comprobante)
     if estado_sunat is not None:
-            new_estado_comprobante = EstadoComprobante(
-                id_comprobante=estado_sunat['id'],
-                estado_comprobante=estado_sunat.get('estadoCp', None),
-                estado_ruc=estado_sunat.get('estadoRuc', None),
-                cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
-            )
-            estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante.id)
-            print('>>>>>>> estado_comprobante', new_estado_comprobante)
-            if estado_comprobante is None:
-                db_estado_comprobante.create(new_estado_comprobante)
-            else:
-                db_estado_comprobante.update(new_estado_comprobante)
+        new_estado_comprobante = EstadoComprobante(
+            id_comprobante=estado_sunat['id'],
+            estado_comprobante=estado_sunat.get('estadoCp', None),
+            estado_ruc=estado_sunat.get('estadoRuc', None),
+            cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
+        )
+        estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(
+            comprobante.id)
+        print('>>>>>>> estado_comprobante', new_estado_comprobante)
+        if estado_comprobante is None:
+            db_estado_comprobante.create(new_estado_comprobante)
+        else:
+            db_estado_comprobante.update(new_estado_comprobante)
     return estado_sunat

@@ -148,6 +148,10 @@ body {
 }
 
 /** Update Bootstrap**/
+.text-bg-secondary {
+  background-color: rgb(156 163 175 / 1) !important;
+}
+
 .btn-success {
   color: #fff;
   background-color: #3ac47d;
@@ -158,7 +162,36 @@ body {
   background-color: #3ac47d;
   border-color: #3ac47d;
 }
+.badge {
+  font-size: .6rem;
+}
 .badge-success {
   color: #fff;
   background-color: #3ac47d;
+}
+
+.text-xs {
+  font-size: 0.8rem;
+  line-height: 1rem;
+}
+
+.table tbody tr td {
+  text-align: left !important;
+  vertical-align: middle;
+}
+
+#tablaComprobantes > tbody > tr > td:nth-child(3),
+#tablaComprobantes > tbody > tr > td:nth-child(8),
+#tablaComprobantes > tbody > tr > td:nth-child(9),
+#tablaComprobantes > tbody > tr > td:nth-child(10) {
+  text-align: center !important;
+}
+
+/* Estilo para el título relacionado con SUNAT */
+.sunat-title {
+  color: #2563eb; /* Color azul característico de SUNAT */
+  padding: 10px 20px; /* Espaciado interno */
+  text-align: center; /* Centrado del texto */
+  font-size: 2rem; /* Tamaño de fuente */
+  font-family: 'Arial', sans-serif; /* Familia de fuente */
 }

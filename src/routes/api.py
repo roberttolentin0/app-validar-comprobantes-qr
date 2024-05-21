@@ -1,7 +1,8 @@
 import traceback
 import re
 
-from flask import Blueprint, request, jsonify, redirect, url_for
+from flask import Blueprint, request, jsonify
+from requests import ConnectionError
 
 from ..controllers import comprobantes_controller
 from ..models.comprobanteModel import Comprobante
@@ -75,6 +76,22 @@ def create_comprobante_qr():
         return jsonify({'message': f'Error al crear el comprobante: {e}'}), 500
 
 
+# Eliminar comprobante y estados
+@api_scope.route('/delete_comprobante', methods=['POST'])
+def delete_comprobante():
+    try:
+        if request.method == 'POST':
+            data = request.json
+            id = data['id']
+            comprobante = comprobantes_controller.get_comprobante_by_id(id)
+            comprobantes_controller.delete_comprobante(comprobante)
+            return jsonify({'message': 'success'}), 200
+    except Exception as e:
+        Logger.add_to_log("error", str(e))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': f"Error al eliminar el comprobante: {e}"}), 500
+
+
 @api_scope.route('/validar/comprobantes', methods=['POST'])
 def validar_comprobantes():
     try:
@@ -86,6 +103,8 @@ def validar_comprobantes():
             return jsonify({'message': 'success', 'data': estados_sunat}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobantes '{e}'"}), 500
+    except ConnectionError as e:
+        return jsonify({'message': f"Verificar la Conexión a Internet"}), 500
     except Exception as e:
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
@@ -109,7 +128,9 @@ def validar_comprobante():
             return jsonify({'message': 'success', 'data': estado_sunat}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobante '{e}'"}), 500
+    except ConnectionError as e:
+        return jsonify({'message': f"Verificar la conexión a Internet"}), 500
     except Exception as e:
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
-        return jsonify({'message': "Error en validar comprobante"}), 500
+        return jsonify({'message': f"Error en validar comprobante '{e}'"}), 500

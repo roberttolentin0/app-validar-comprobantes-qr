@@ -13,7 +13,6 @@ formQr.addEventListener("submit", (event) => {
   infoAutoClose("Agregando, Esperar...");
   clickSubmit = true;
   const dataQr = inputDataQr.value.trim();
-  // const reasonSinSaltos = textAreaReason.value.trim().replace(/\n/g, ' ');
   if (dataQr == "") {
     console.log("Verificar QR");
     Swal.fire({
@@ -46,10 +45,6 @@ formQr.addEventListener("submit", (event) => {
       return response.json();
     })
     .then(responseJson => {
-      console.log("responseJson")
-      console.log(responseJson);
-      // SIMULAR UN POS.
-      // Se puede poner un spinner mientras se agrega el comprobante
       const comprobante = responseJson.new_comprobante
       addComprobanteToTable(comprobante)
       successAutoClose("Comprobante agregado", 500);
@@ -74,13 +69,11 @@ formQr.addEventListener("submit", (event) => {
 formDataComprobante.addEventListener("submit", (event) => {
   event.preventDefault();
   if (clickSubmit) {
-    console.log("Ya ha creado, Esperar...");
     infoAutoClose("Agregando, Esperar...", 2500);
     return;
   }
   infoAutoClose("Agregando, Esperar...");
   clickSubmit = true;
-  console.log('formDataComprobante', formDataComprobante)
   const formData = new FormData(formDataComprobante);
   formData.forEach(function(value, key){
         console.log(key, value);
@@ -102,10 +95,6 @@ formDataComprobante.addEventListener("submit", (event) => {
       return response.json();
     })
     .then(responseJson => {
-      console.log("responseJson")
-      console.log(responseJson);
-      // SIMULAR UN POS.
-      // Se puede poner un spinner mientras se agrega el comprobante
       const comprobante = responseJson.new_comprobante
       addComprobanteToTable(comprobante)
       successAutoClose("Comprobante agregado", 500);

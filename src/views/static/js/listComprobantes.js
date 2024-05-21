@@ -92,7 +92,7 @@ function renderRowStatus(status) {
 
 function renderRowOptions(id) {
   const buttonValidar = `
-        <button onclick="validar(${id})" class="btn btn-light col-3 col-sm-4"">
+        <button onclick="validar(${id})" class="btn btn-light col-3 col-sm-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </button>
     `;
@@ -109,9 +109,71 @@ function renderRowOptions(id) {
 
   return `
           <div class="row">
-              ${buttonDetails} ${buttonValidar} ${buttonEliminar}
+              ${buttonDetails}${buttonValidar}${buttonEliminar}
           </div>
           `;
+}
+
+function eliminar(id) {
+  Swal.fire({
+    title: "Eliminar comprobante",
+    text: "¿Está seguro que desea eliminar este comprobante?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#fca5a5",
+    cancelButtonColor: "#adb5bd",
+    confirmButtonText: "Eliminar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      eliminarComprobante(id);
+    }
+  });
+}
+
+function eliminarComprobante(id) {
+  loading.classList.add("loading");
+  const url = `/api/delete_comprobante`;
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then((errorData) => {
+          const error = new Error("Respuesta no satisfactoria");
+          error.data = errorData;
+          throw error;
+        });
+      }
+      response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      Swal.fire("Eliminación completada", "", "success").then(() => {
+        location.reload();
+      });
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data) {
+        // Error del servidor
+        errorMessage = `Error del servidor: ${
+          error.data.message || JSON.stringify(error.data)
+        }`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      console.error(errorMessage);
+      Swal.fire("Error en la eliminaicón", errorMessage, "error");
+    })
+    .finally(() => loading.classList.remove("loading"));
 }
 
 function validar(id) {
@@ -206,6 +268,7 @@ function validarComprobantes() {
         return response.json().then((errorData) => {
           const error = new Error("Respuesta no satisfactoria");
           error.data = errorData;
+          error.status = response.status;
           throw error;
         });
       }
@@ -219,6 +282,7 @@ function validarComprobantes() {
     })
     .catch((error) => {
       let errorMessage;
+      console.log('err', error.status)
       if (error.data) {
         // Error del servidor
         errorMessage = `Error del servidor: ${
@@ -227,6 +291,10 @@ function validarComprobantes() {
       } else {
         // Error de red u otro tipo de error
         errorMessage = `Error: ${error.message}`;
+      }
+      if (error.status === 404) {
+        Swal.fire("No se validaron", errorMessage, "info");
+        return
       }
       console.error(errorMessage);
       Swal.fire("Error en la validación", errorMessage, "error");

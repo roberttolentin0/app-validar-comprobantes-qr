@@ -32,6 +32,17 @@ def create(comprobante: Comprobante) -> Comprobante:
     comprobante_dict["id"] = id_
     return Comprobante(**comprobante_dict)
 
+
+def delete(comprobante: Comprobante) -> Comprobante:
+    query = """
+        DELETE FROM public.comprobantes
+        WHERE id = %(id)s
+    """
+    parameters = {'id': comprobante.id}
+    connection._fetch_none(query, parameters)
+    return comprobante
+
+
 def get_comprobante_by_id(_id) -> Comprobante:
     ''' @params: id
         @return: comprobante '''
