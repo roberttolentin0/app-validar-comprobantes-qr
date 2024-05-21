@@ -17,11 +17,10 @@
       <div class="accordion-body text-center p-2">
         <form id="formDataComprobante" class="row g-2">
           <div class="col-md-6">
-            <!-- <label for="rucEmisor" class="form-label">RUC Emisor</label> -->
-            <input type="text" class="form-control" id="rucEmisor" placeholder="Ruc del emisor">
+            <input type="text" id="ruc" name="ruc" class="form-control" placeholder="Ruc del emisor" minlength="11" maxlength="11" required>
           </div>
           <div class="col-md-6">
-            <select id="tipoComprobante" class="form-select">
+            <select id="tipoComprobante" name="tipoComprobante" class="form-select" required>
               <option>Tipo Comprobante</option>
               <option value="01">Factura</option>
               <option value="03">Boleta de venta</option>
@@ -31,23 +30,23 @@
           <div class="col-12">
             <div class="row text-center">
               <div class="col-5">
-                <input type="text" class="form-control" id="serie" placeholder="Serie">
+                <input type="text" class="form-control" id="serie" name="serie" placeholder="Serie" required>
               </div>
               <div class="col-1">
                 -
               </div>
               <div class="col-6">
-                <input type="text" class="form-control" id="numero" placeholder="Número">
+                <input type="text" class="form-control" id="numero" name="numero" placeholder="Número" required>
               </div>
             </div>
           </div>
           <div class="col-12">
             <div class="row text-center">
               <div class="col-6">
-                <input type="date" class="form-control" id="fechaEmision" placeholder="Fecha emisión">
+                <input type="date" class="form-control" id="fechaEmision" name="fechaEmision" placeholder="Fecha emisión" required>
               </div>
               <div class="col-6">
-                <input type="number" step="any" class="form-control" id="monto" placeholder="Monto">
+                <input type="number" step="any" class="form-control" id="monto" name="monto" placeholder="Monto" required>
               </div>
             </div>
           </div>

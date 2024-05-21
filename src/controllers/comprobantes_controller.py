@@ -54,68 +54,62 @@ def get_id_tipo_comprobante(cod_comprobante) -> int:
 
 
 def validar_en_sunat() -> list:
-    try:
-        estados_sunat = []
-        comprobantes_sin_estado = db_comprobante.list_statusless_comprobante()
-        print('comprobantes_sin_estado', comprobantes_sin_estado)
-        for comprobante in comprobantes_sin_estado:
-            print(comprobante.ruc)
-            estado_sunat = validar_en_sunat_individual(comprobante)
-            # data_comprobante = {
-            #     "id": comprobante.id,
-            #     "numRuc": comprobante.ruc,
-            #     "codComp": "01",
-            #     "numeroSerie": comprobante.serie,
-            #     "numero": comprobante.numero,
-            #     "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision),  # "26/11/2023"
-            #     "monto": comprobante.monto  # "22725.00"
-            # }
-            # estado_sunat = validar_comprobante(data_comprobante)
-            # if estado_sunat is not None:
-            #     estado_comprobante = EstadoComprobante(
-            #         id_comprobante=estado_sunat['id'],
-            #         estado_comprobante=estado_sunat.get('estadoCp', None),
-            #         estado_ruc=estado_sunat.get('estadoRuc', None),
-            #         cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
-            #     )
-            #     # print('>>>>>>> estado_comprobante', estado_comprobante)
-            #     db_estado_comprobante.create(estado_comprobante)
-            estados_sunat.append(estado_sunat)
-            # Validar comprobantes con la API Sunat
-        print('-- Comprobantes validados: ', len(comprobantes_sin_estado),
-              estados_sunat, len(estados_sunat))
-    except Exception as e:
-        print('Exception validar en sunat: ', e)
+    estados_sunat = []
+    comprobantes_sin_estado = db_comprobante.list_statusless_comprobante()
+    print('comprobantes_sin_estado', comprobantes_sin_estado)
+    if comprobantes_sin_estado is None:
+        raise Exception('No hay comprobantes sin estado')
+    for comprobante in comprobantes_sin_estado:
+        print(comprobante.ruc)
+        estado_sunat = validar_en_sunat_individual(comprobante)
+        # data_comprobante = {
+        #     "id": comprobante.id,
+        #     "numRuc": comprobante.ruc,
+        #     "codComp": "01",
+        #     "numeroSerie": comprobante.serie,
+        #     "numero": comprobante.numero,
+        #     "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision),  # "26/11/2023"
+        #     "monto": comprobante.monto  # "22725.00"
+        # }
+        # estado_sunat = validar_comprobante(data_comprobante)
+        # if estado_sunat is not None:
+        #     estado_comprobante = EstadoComprobante(
+        #         id_comprobante=estado_sunat['id'],
+        #         estado_comprobante=estado_sunat.get('estadoCp', None),
+        #         estado_ruc=estado_sunat.get('estadoRuc', None),
+        #         cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
+        #     )
+        #     # print('>>>>>>> estado_comprobante', estado_comprobante)
+        #     db_estado_comprobante.create(estado_comprobante)
+        estados_sunat.append(estado_sunat)
+        # Validar comprobantes con la API Sunat
+    print('-- Comprobantes validados: ', len(comprobantes_sin_estado), estados_sunat, len(estados_sunat))
     return estados_sunat
 
 
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     estado_sunat = []
-    try:
-        data_comprobante = {
-            "id": comprobante.id,
-            "numRuc": comprobante.ruc,
-            "codComp": "01",
-            "numeroSerie": comprobante.serie,
-            "numero": comprobante.numero,
-            "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
-            "monto": comprobante.monto  # "22725.00"
-        }
-        estado_sunat = validar_comprobante(data_comprobante)
-        if estado_sunat is not None:
-                new_estado_comprobante = EstadoComprobante(
-                    id_comprobante=estado_sunat['id'],
-                    estado_comprobante=estado_sunat.get('estadoCp', None),
-                    estado_ruc=estado_sunat.get('estadoRuc', None),
-                    cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
-                )
-                estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante.id)
-                print('>>>>>>> estado_comprobante', new_estado_comprobante)
-                if estado_comprobante is None:
-                    db_estado_comprobante.create(new_estado_comprobante)
-                else:
-                    db_estado_comprobante.update(new_estado_comprobante)
-
-    except Exception as e:
-        print('Exception validar en sunat individual: ', e)
+    data_comprobante = {
+        "id": comprobante.id,
+        "numRuc": comprobante.ruc,
+        "codComp": "01",
+        "numeroSerie": comprobante.serie,
+        "numero": comprobante.numero,
+        "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
+        "monto": comprobante.monto  # "22725.00"
+    }
+    estado_sunat = validar_comprobante(data_comprobante)
+    if estado_sunat is not None:
+            new_estado_comprobante = EstadoComprobante(
+                id_comprobante=estado_sunat['id'],
+                estado_comprobante=estado_sunat.get('estadoCp', None),
+                estado_ruc=estado_sunat.get('estadoRuc', None),
+                cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
+            )
+            estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante.id)
+            print('>>>>>>> estado_comprobante', new_estado_comprobante)
+            if estado_comprobante is None:
+                db_estado_comprobante.create(new_estado_comprobante)
+            else:
+                db_estado_comprobante.update(new_estado_comprobante)
     return estado_sunat
