@@ -4,15 +4,18 @@ import json
 import jwt
 
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-from datetime import datetime, timedelta
+from datetime import datetime
 from dotenv import load_dotenv
+from ..routes.errors import ComprobanteSunatError
 from ..utils.utils import measure_time
+
 
 load_dotenv()
 
 RUC = os.getenv('RUC')
 CLIENT_ID = os.getenv('CLIENT_ID_SOL')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET_SOL')
+
 
 class TokenSunat():
     def __init__(self) -> None:
@@ -40,7 +43,8 @@ class TokenSunat():
                 if expired_token:
                     print("El token ha expirado.")
                 else:
-                    print("El token es válido hasta:", exp_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
+                    print("El token es válido hasta:",
+                          exp_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
                 return expired_token
             else:
                 print("El token no incluye información de expiración.")
@@ -58,13 +62,15 @@ class TokenSunat():
         if response_token.status_code == 200:
             return response_token.json().get('access_token')
         else:
-            print(f"Error al obtener el token. Código de estado: {response_token.status_code}")
+            print(
+                f"Error al obtener el token. Código de estado: {response_token.status_code}")
             print(response_token.text)
             return None
 
     def get_ruta_token_json(self):
         # Ruta al directorio services de tu aplicación
-        directorio_static = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services')
+        directorio_static = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'services')
         return os.path.join(directorio_static, 'data_token.json')
 
     def update_token_in_json(self):
@@ -107,6 +113,8 @@ class TokenSunat():
 
 
 token_sunat = TokenSunat()
+
+
 @measure_time
 def validar_comprobante(data_comprobante):
     """Validar estado de comprobante en SUNAT
@@ -131,17 +139,17 @@ def validar_comprobante(data_comprobante):
         'Content-Type': 'application/json',
         'Authorization': auth_token
     }
-
     response = requests.request("POST", url, headers=headers, data=payload)
     if response.status_code == 200:
         response_data = response.json()['data']
         print('response_data', response_data)
         status_comprobante = data_comprobante | response_data
         return status_comprobante
-    elif response.status_code == 401:
-        pass
+    elif response.status_code == 422:
+        response_data = response.json()
+        print('response_data_error', response_data['message'])
+        raise ComprobanteSunatError(response_data['message'])
     else:
         print(f"Error al obtener Código de estado: {response.status_code}")
         print(response.text)
         return None
-
