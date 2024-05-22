@@ -163,7 +163,7 @@ def list_all_with_status() -> List[ViewComprobanteEstados]:
 def list_statusless_comprobante() -> list[Comprobante]:
     query = """
         SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
-	    FROM public.view_comprobantes_sin_estados;
+	    FROM public.view_comprobantes_sin_estados ORDER BY id DESC;
     """
     records = connection._fetch_all(query=query)
 

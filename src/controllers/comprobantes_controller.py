@@ -11,6 +11,7 @@ from ..routes.errors import ComprobanteAlreadyExistsError
 from ..services.validar_comprobante_sunat import validar_comprobante
 from ..utils.helpers import parsed_comprobante_with_status
 from ..utils.DateFormat import DateFormat
+from ..utils.utils import measure_time
 
 
 def create(comprobante_: Comprobante) -> Comprobante:
@@ -59,28 +60,29 @@ def get_id_tipo_comprobante(cod_comprobante) -> int:
     return None
 
 
+@measure_time
 def validar_en_sunat() -> list:
     estados_sunat = []
     comprobantes_sin_estado = db_comprobante.list_statusless_comprobante()
-    print('comprobantes_sin_estado', comprobantes_sin_estado)
+    # print('comprobantes_sin_estado', comprobantes_sin_estado)
     if comprobantes_sin_estado is None:
         raise Exception('No hay comprobantes sin estado')
     for comprobante in comprobantes_sin_estado:
-        print(comprobante.ruc)
         estado_sunat = validar_en_sunat_individual(comprobante)
         estados_sunat.append(estado_sunat)
         # Validar comprobantes con la API Sunat
-    print('-- Comprobantes validados: ', len(comprobantes_sin_estado),
-          estados_sunat, len(estados_sunat))
+    print(f'-- Comprobantes validados: {len(estados_sunat)}/{len(comprobantes_sin_estado)}', estados_sunat)
     return estados_sunat
 
 
+@measure_time
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
+    print('Validando...')
     estado_sunat = []
     data_comprobante = {
         "id": comprobante.id,
         "numRuc": comprobante.ruc,
-        "codComp": "01",
+        "codComp": "01", # Cambiar para que sea dinamico
         "numeroSerie": comprobante.serie,
         "numero": comprobante.numero,
         "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
@@ -88,15 +90,19 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     }
     estado_sunat = validar_comprobante(data_comprobante)
     if estado_sunat is not None:
+        observaciones = estado_sunat.get('observaciones', None)
+        if observaciones is not None and len(observaciones) > 0:
+            observaciones = ' '.join(estado_sunat['observaciones'])
+
         new_estado_comprobante = EstadoComprobante(
             id_comprobante=estado_sunat['id'],
             estado_comprobante=estado_sunat.get('estadoCp', None),
             estado_ruc=estado_sunat.get('estadoRuc', None),
-            cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None)
+            cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None),
+            observaciones=observaciones
         )
-        estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(
-            comprobante.id)
-        print('>>>>>>> estado_comprobante', new_estado_comprobante)
+        print('Estado comprobante: ', new_estado_comprobante)
+        estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante.id)
         if estado_comprobante is None:
             db_estado_comprobante.create(new_estado_comprobante)
         else:

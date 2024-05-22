@@ -23,11 +23,11 @@ def get_list():
 
 
 @api_scope.route('/create_comprobante', methods=['POST'])
-def create_comprobante_qr():
-    data = request.form
-    print('Crear permiso QR', data)
+def create_comprobante():
     try:
         if request.method == 'POST':
+            data = request.form
+            # print('Crear permiso QR', data)
             data_qr = data.get('dataQr', None)
             if data_qr is not None:
                 # Para separaciones por '|' y ']'
@@ -35,24 +35,29 @@ def create_comprobante_qr():
                 print('parse_data_qr', parsed_data_qr)
                 fecha = DateFormat.find_and_format_date(data=data_qr)
                 data_comprobante = {
-                    'ruc': parsed_data_qr[0],
-                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1]),
-                    'serie': parsed_data_qr[2],
-                    'numero': parsed_data_qr[3],
-                    'monto': parsed_data_qr[5],
+                    'ruc': parsed_data_qr[0].strip(),
+                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1].strip()),
+                    'serie': parsed_data_qr[2].strip(),
+                    'numero': parsed_data_qr[3].strip(),
+                    'monto': parsed_data_qr[5].strip(),
                     'fecha_emision': fecha
                 }
             else:
                 data_comprobante = {
-                    'ruc': data['ruc'],
-                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(data['tipoComprobante']),
-                    'serie': data['serie'],
-                    'numero': data['numero'],
-                    'monto': data['monto'],
+                    'ruc': data['ruc'].strip(),
+                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(data['tipoComprobante'].strip()),
+                    'serie': data['serie'].strip(),
+                    'numero': data['numero'].strip(),
+                    'monto': data['monto'].strip(),
                     'fecha_emision': data['fechaEmision']
                 }
 
             print('data_comprobante', data_comprobante)
+            # Verificar que todas las claves tengan valores
+            for key, value in data_comprobante.items():
+                if value is None or (isinstance(value, str) and not value.strip()):
+                    raise ValueError(f"El valor para '{key}' no puede estar vacío o ser nulo.")
+
             comprobante = Comprobante(
                 ruc=data_comprobante['ruc'],
                 fecha_emision=data_comprobante['fecha_emision'],
@@ -96,7 +101,6 @@ def delete_comprobante():
 def validar_comprobantes():
     try:
         if request.method == 'POST':
-            print('Validando...')
             estados_sunat = comprobantes_controller.validar_en_sunat()
             if not estados_sunat:
                 return jsonify({'message': "No hay comprobantes a validar"}), 404
@@ -116,10 +120,8 @@ def validar_comprobante():
     try:
         if request.method == 'POST':
             data = request.json
-            print('data', data)
             id = data['id']
             comprobante = comprobantes_controller.get_comprobante_by_id(id)
-            print('Validando...')
             estado_sunat = comprobantes_controller.validar_en_sunat_individual(
                 comprobante)
             print('Validado individualmente: ', estado_sunat)

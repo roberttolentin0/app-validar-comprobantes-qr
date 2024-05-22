@@ -4,8 +4,8 @@ import psycopg2
 
 from contextlib import contextmanager
 from typing import Any, Iterator, List, Optional
-# Logger
-# from src.utils.Logger import Logger
+from ..utils.Logger import Logger
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,12 +32,11 @@ class Connection:
                 "port": self.port
             }
             self.conn = psycopg2.connect(**conn_params)
-            print("Conexión exitosa a la base de datos PostgreSQL")
             return self.conn
         except psycopg2.Error as e:
-            # Logger.add_to_log("error", str(e))
-            # Logger.add_to_log("error", traceback.format_exc())
-            print("Error, connect db: ", str(e))
+            Logger.add_to_log("error", str(e))
+            Logger.add_to_log("error", traceback.format_exc())
+            # print("Error, connect db: ", str(e))
 
 
     def close(self):
