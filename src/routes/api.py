@@ -75,10 +75,12 @@ def create_comprobante():
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
         return jsonify({'message': f"Error: {e}"}), 500
+    except ValueError as e:
+        return jsonify({'message': f"CÓDIGO QR INCORRECTO: {e}"}), 500
     except Exception as e:
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
-        return jsonify({'message': f'Error al crear el comprobante: {e}'}), 500
+        return jsonify({'message': f'CÓDIGO QR INCORRECTO, Ingrese manualmente...'}), 500
 
 
 # Eliminar comprobante y estados

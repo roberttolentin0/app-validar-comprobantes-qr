@@ -54,7 +54,7 @@ formQr.addEventListener("submit", (event) => {
       let errorMessage;
       if (error.data){
         // Error del servidor
-        errorMessage = `Error del servidor: ${error.data.message || JSON.stringify(error.data)}`;
+        errorMessage = `${error.data.message || JSON.stringify(error.data)}`;
       } else {
         // Error de red u otro tipo de error
         errorMessage = `Error: ${error.message}`;
