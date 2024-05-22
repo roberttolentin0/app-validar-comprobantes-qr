@@ -34,18 +34,20 @@ def create_comprobante():
                 parsed_data_qr = re.split(r'\||\]', data_qr)
                 print('parse_data_qr', parsed_data_qr)
                 fecha = DateFormat.find_and_format_date(data=data_qr)
+                id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
                 data_comprobante = {
                     'ruc': parsed_data_qr[0].strip(),
-                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(parsed_data_qr[1].strip()),
+                    'id_tipo_comprobante': id_tipo_comprobante,
                     'serie': parsed_data_qr[2].strip(),
                     'numero': parsed_data_qr[3].strip(),
                     'monto': parsed_data_qr[5].strip(),
                     'fecha_emision': fecha
                 }
             else:
+                id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=data['tipoComprobante'].strip()).id
                 data_comprobante = {
                     'ruc': data['ruc'].strip(),
-                    'id_tipo_comprobante': comprobantes_controller.get_id_tipo_comprobante(data['tipoComprobante'].strip()),
+                    'id_tipo_comprobante': id_tipo_comprobante,
                     'serie': data['serie'].strip(),
                     'numero': data['numero'].strip(),
                     'monto': data['monto'].strip(),

@@ -51,12 +51,12 @@ def get_comprobante_status_by_id(id) -> ViewComprobanteEstados:
     return parsed_comprobante_with_status(comprobante)
 
 
-def get_id_tipo_comprobante(cod_comprobante) -> int:
+def get_tipo_comprobante(id=None, cod_comprobante=None) -> TipoComprobante:
     tipos = db_tipo_comprobante.list_all_type()
     print(tipos)
     for tipo in tipos:
-        if tipo.cod_comprobante == cod_comprobante:
-            return tipo.id
+        if tipo.id == id or tipo.cod_comprobante == cod_comprobante:
+            return tipo
     return None
 
 
@@ -78,11 +78,12 @@ def validar_en_sunat() -> list:
 @measure_time
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     print('Validando...')
+    print(comprobante)
     estado_sunat = []
     data_comprobante = {
         "id": comprobante.id,
         "numRuc": comprobante.ruc,
-        "codComp": "01", # Cambiar para que sea dinamico
+        "codComp":  get_tipo_comprobante(id=comprobante.id_tipo_comprobante).cod_comprobante, # "01"
         "numeroSerie": comprobante.serie,
         "numero": comprobante.numero,
         "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
