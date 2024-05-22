@@ -131,7 +131,9 @@ def validar_comprobante(data_comprobante):
         }
     Return: Respuesta de la API Sunat
     """
-    print(data_comprobante)
+    print('Comprobante: ', data_comprobante)
+    MAX_INTENTOS = 10
+    intentos = 0
     auth_token = token_sunat.get_token()
     url = f'https://api.sunat.gob.pe/v1/contribuyente/contribuyentes/{RUC}/validarcomprobante'
     payload = json.dumps(data_comprobante)
@@ -139,17 +141,22 @@ def validar_comprobante(data_comprobante):
         'Content-Type': 'application/json',
         'Authorization': auth_token
     }
-    response = requests.request("POST", url, headers=headers, data=payload)
-    if response.status_code == 200:
-        response_data = response.json()['data']
-        print('response_data', response_data)
-        status_comprobante = data_comprobante | response_data
-        return status_comprobante
-    elif response.status_code == 422:
-        response_data = response.json()
-        print('response_data_error', response_data['message'])
-        raise ComprobanteSunatError(response_data['message'])
-    else:
-        print(f"Error al obtener Código de estado: {response.status_code}")
-        print(response.text)
-        return None
+    while intentos < MAX_INTENTOS:
+        response = requests.request("POST", url, headers=headers, data=payload)
+        if response.status_code == 200:
+            response_data = response.json()['data']
+            # print('response_data', response_data)
+            if response_data:
+                status_comprobante = data_comprobante | response_data
+                return status_comprobante
+            else:
+                intentos += 1
+                print(f"Intento {intentos} fallido, reintentando...")
+        elif response.status_code == 422:
+            response_data = response.json()
+            print('Error Response api sunat', response_data['message'])
+            raise ComprobanteSunatError(response_data['message'])
+        else:
+            print(f"Error al obtener Código de estado: {response.status_code}")
+            print(response.text)
+            return None

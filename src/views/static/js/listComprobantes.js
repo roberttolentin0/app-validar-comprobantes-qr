@@ -297,7 +297,9 @@ function validarComprobantes() {
         return
       }
       console.error(errorMessage);
-      Swal.fire("Error en la validación", errorMessage, "error");
+      Swal.fire("Error en la validación", errorMessage, "error").then(() => {
+        location.reload();
+      });;
     })
     .finally(() => loading.classList.remove("loading"));
 }
