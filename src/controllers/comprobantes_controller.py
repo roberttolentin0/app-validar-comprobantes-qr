@@ -53,7 +53,6 @@ def get_comprobante_status_by_id(id) -> ViewComprobanteEstados:
 
 def get_tipo_comprobante(id=None, cod_comprobante=None) -> TipoComprobante:
     tipos = db_tipo_comprobante.list_all_type()
-    print(tipos)
     for tipo in tipos:
         if tipo.id == id or tipo.cod_comprobante == cod_comprobante:
             return tipo

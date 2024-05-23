@@ -169,11 +169,14 @@ def list_statusless_comprobante() -> list[Comprobante]:
 
     comprobantes = []
     for record in records:
-        comprobante = Comprobante(id=record[0],
+        comprobante = Comprobante(
+                              id=record[0],
                               ruc=record[1],
                               fecha_emision=record[2],
                               serie=record[3],
                               numero=record[4],
-                              monto=record[5])
+                              monto=record[5],
+                              created_at=record[7],
+                              id_tipo_comprobante=record[8])
         comprobantes.append(comprobante)
     return comprobantes

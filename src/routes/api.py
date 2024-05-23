@@ -31,9 +31,10 @@ def create_comprobante():
             data_qr = data.get('dataQr', None)
             if data_qr is not None:
                 # Para separaciones por '|' y ']'
-                parsed_data_qr = re.split(r'\||\]', data_qr)
+                parsed_data_qr = data_qr.replace("'", "-")
+                parsed_data_qr = re.split(r'\||\]', parsed_data_qr)
                 print('parse_data_qr', parsed_data_qr)
-                fecha = DateFormat.find_and_format_date(data=data_qr)
+                fecha = DateFormat.find_and_format_date(data=parsed_data_qr[6])
                 id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
                 data_comprobante = {
                     'ruc': parsed_data_qr[0].strip(),
@@ -108,7 +109,7 @@ def validar_comprobantes():
             estados_sunat = comprobantes_controller.validar_en_sunat()
             if not estados_sunat:
                 return jsonify({'message': "No hay comprobantes a validar"}), 404
-            return jsonify({'message': 'success', 'data': estados_sunat}), 200
+            return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}'}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobantes '{e}'"}), 500
     except ConnectionError as e:

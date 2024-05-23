@@ -213,10 +213,10 @@ function validarComprobante(id) {
           throw error;
         });
       }
-      response.json();
+      return response.json();
     })
     .then((data) => {
-      console.log(data);
+      // console.log('data-', data);
       Swal.fire("Validacion completada", "", "success").then(() => {
         location.reload();
       });
@@ -262,7 +262,7 @@ function validarComprobantes() {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -272,11 +272,10 @@ function validarComprobantes() {
           throw error;
         });
       }
-      response.json();
+      return response.json();
     })
-    .then((data) => {
-      console.log(data);
-      Swal.fire("Validaciones completadas", "", "success").then(() => {
+    .then(responseJson => {
+      Swal.fire("Validaciones completadas", `${responseJson.info}`, "success").then(() => {
         location.reload();
       });
     })
