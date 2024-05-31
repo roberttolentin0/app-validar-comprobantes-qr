@@ -9,6 +9,7 @@ from ..models.comprobanteModel import Comprobante
 from ..routes.errors import ComprobanteAlreadyExistsError, ComprobanteSunatError
 from ..utils.DateFormat import DateFormat
 from ..utils.Logger import Logger
+from ..utils.helpers import parse_qr_code
 
 api_scope = Blueprint("api", __name__)
 
@@ -21,7 +22,6 @@ def get_list():
     print(comprobantes_list)
     return jsonify(comprobantes_dict)
 
-
 @api_scope.route('/create_comprobante', methods=['POST'])
 def create_comprobante():
     try:
@@ -30,10 +30,8 @@ def create_comprobante():
             # print('Crear permiso QR', data)
             data_qr = data.get('dataQr', None)
             if data_qr is not None:
-                # Para separaciones por '|' y ']'
-                parsed_data_qr = data_qr.replace("'", "-")
-                parsed_data_qr = re.split(r'\||\]', parsed_data_qr)
-                print('parse_data_qr', parsed_data_qr)
+                # Crear por DATA QR
+                parsed_data_qr = parse_qr_code(data_qr)
                 fecha = DateFormat.find_and_format_date(data=parsed_data_qr[6])
                 id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
                 data_comprobante = {
@@ -45,6 +43,7 @@ def create_comprobante():
                     'fecha_emision': fecha
                 }
             else:
+                # Crear Manualmente
                 id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=data['tipoComprobante'].strip()).id
                 data_comprobante = {
                     'ruc': data['ruc'].strip(),

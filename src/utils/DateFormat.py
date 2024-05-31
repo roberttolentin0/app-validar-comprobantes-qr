@@ -62,7 +62,8 @@ class DateFormat():
         '''
             Utilizar una expresión regular para encontrar fechas en los formatos 'dd-mm-yyyy' | 'yyyy-mm-dd'
         '''
-        match = re.search(r'\d{4}-\d{2}-\d{2}|\d{2}[-/]\d{2}[-/]\d{4}', data)
+        fecha = data.replace("'", "-")  # Para separaciones por '''
+        match = re.search(r'\d{4}-\d{2}-\d{2}|\d{2}[-/]\d{2}[-/]\d{4}', fecha)
         print('match', match)
         if match:
             date_str = match.group(0)
