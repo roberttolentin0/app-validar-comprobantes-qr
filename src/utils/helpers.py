@@ -2,6 +2,7 @@ import re
 from ..constans import CONDICION_DOMICILIO_CONTRIBUYENTE
 from ..constans import ESTADO_COMPROBANTE
 from ..constans import ESTADO_CONTRIBUYENTE
+from ..constans import RUC_EMPRESA
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from .DateFormat import DateFormat
 
@@ -23,10 +24,17 @@ def convert_to_postgres_format(amount_str):
     amount_str = amount_str.replace(',', '.')
     return amount_str
 
-
 def parse_qr_code(input_str):
+    '''input_str: 20100127165|01|F100|00451161|99.61|653.06|2024-05-22|6|20609699982|hgH0bEf7HK57HHPG1p6ZihmbQvI='''
     # Separar la entrada usando el delimitador común '|'
     parts = re.split(r'\||\]', input_str)
+    print(parts)
+
+    # Transformar parts si el RUC de la empresa está en la posición 3
+    # Ex [6, 20602289029, 6, 20609699982, 01, F010-00001387, 2023-03-08, 102.97, 675.00, Pb4eBPZCAYkGBCh6FLKivNpPKAE=]
+    if len(parts) > 3 and parts[3] == RUC_EMPRESA:
+        parts = [parts[1]] + parts[4:6] + parts[7:9] + [parts[6]]  # [20602289029, 01, F010-00001387, 2023-03-08, 102.97, 675.00, Pb4eBPZCAYkGBCh6FLKivNpPKAE=]
+
     # Eliminar cualquier parte vacía al final
     parts = [part for part in parts if part]
 
