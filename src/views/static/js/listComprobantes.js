@@ -4,16 +4,16 @@ const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
   autoWidth: false,
-  language: {
-    entries: {
-      _: "Entradas",
-      1: "Entrada",
-    },
-    search: "Buscar: ",
-  },
   // language: {
-  //   "url": "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+  //   entries: {
+  //     _: "Entradas",
+  //     1: "Entrada",
+  //   },
+  //   search: "Buscar: ",
   // },
+  language: {
+    "url": "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+  },
   layout: {
     topStart: {
       search: {
@@ -66,6 +66,7 @@ function addComprobanteToTable(comprobante) {
       renderRowStatus(comprobante.estado_comprobante),
       renderRowStatus(comprobante.estado_ruc),
       renderRowStatus(comprobante.cod_domiciliaria_ruc),
+      `<span style="font-size: 0.7rem"}>${comprobante.observaciones || ''}</span>`,
       renderRowOptions(comprobante),
     ])
     .draw();
@@ -110,7 +111,7 @@ function renderRowOptions(comprobante) {
 
   return `
           <div class="row">
-              ${buttonDetails}${buttonValidar}${buttonEliminar}
+              ${buttonValidar}${buttonEliminar}
           </div>
           `;
 }
