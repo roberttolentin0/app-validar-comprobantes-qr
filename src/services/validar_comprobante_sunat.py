@@ -122,6 +122,7 @@ def validar_comprobante(data_comprobante):
     data_comprobante -- Dict con datos del comprobante:
         ex:
         {
+            "id": 1
             "numRuc": "20522199495",
             "codComp": "01",
             "numeroSerie": "F001",
@@ -155,7 +156,7 @@ def validar_comprobante(data_comprobante):
         elif response.status_code == 422:
             response_data = response.json()
             print('Error Response api sunat', response_data['message'])
-            raise ComprobanteSunatError(response_data['message'])
+            raise ComprobanteSunatError(f"En comprobante #ID {data_comprobante['id']} | {data_comprobante['numeroSerie']} {data_comprobante['numero']}, Msg: {response_data['message']}")
         else:
             print(f"Error al obtener Código de estado: {response.status_code}")
             print(response.text)
