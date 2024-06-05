@@ -26,7 +26,7 @@ def convert_to_postgres_format(amount_str):
 
 def parse_qr_code(input_str):
     '''input_str: 20100127165|01|F100|00451161|99.61|653.06|2024-05-22|6|20609699982|hgH0bEf7HK57HHPG1p6ZihmbQvI='''
-    # Separar la entrada usando el delimitador común '|'
+    # Separar la entrada usando el delimitador '|' or ']'
     parts = re.split(r'\||\]', input_str)
     print(parts)
 
@@ -34,6 +34,11 @@ def parse_qr_code(input_str):
     # Ex [6, 20602289029, 6, 20609699982, 01, F010-00001387, 2023-03-08, 102.97, 675.00, Pb4eBPZCAYkGBCh6FLKivNpPKAE=]
     if len(parts) > 3 and parts[3] == RUC_EMPRESA:
         parts = [parts[1]] + parts[4:6] + parts[7:9] + [parts[6]]  # [20602289029, 01, F010-00001387, 2023-03-08, 102.97, 675.00, Pb4eBPZCAYkGBCh6FLKivNpPKAE=]
+
+    # Transformar parts si el RUC del emisor tiene mas de 11 dígitos, obtener los 11 últimos dígitos
+    # Ex ['}00002620601114934', '01', 'FF01', '00008041', '86.00', '563.75', "01'06'2024", '20609699982', 'TERRANOVA TRADING S.A.C.', '']
+    if len(parts[0]) > 11:
+        parts[0] = parts[0][-11:]
 
     # Eliminar cualquier parte vacía al final
     parts = [part for part in parts if part]

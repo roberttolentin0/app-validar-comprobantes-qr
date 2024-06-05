@@ -27,12 +27,11 @@ def create_comprobante():
     try:
         if request.method == 'POST':
             data = request.form
-            # print('Crear permiso QR', data)
             data_qr = data.get('dataQr', None)
+            print('Crear permiso: Data QR', data_qr)
             if data_qr is not None:
                 # Crear por DATA QR
                 parsed_data_qr = parse_qr_code(data_qr)
-                print('parsed_data_qr', parsed_data_qr)
                 fecha = DateFormat.find_and_format_date(data=parsed_data_qr[6])
                 id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
                 data_comprobante = {
