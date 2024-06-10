@@ -36,21 +36,21 @@ class DateFormat():
         # Intentar analizar la fecha en formato 'yyyy-mm-dd'
         try:
             date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-            return date_obj.strftime('%d/%m/%Y')
+            return date_obj.strftime('%Y-%m-%d')
         except ValueError:
             pass
 
         # Intentar analizar la fecha en formato 'dd-mm-yyyy'
         try:
             date_obj = datetime.strptime(date_str, '%d-%m-%Y')
-            return date_obj.strftime('%d/%m/%Y')
+            return date_obj.strftime('%Y-%m-%d')
         except ValueError:
             pass
 
         # Intentar analizar la fecha en formato 'dd-mm-yyyy'
         try:
             date_obj = datetime.strptime(date_str, '%d/%m/%Y')
-            return date_obj.strftime('%d/%m/%Y')
+            return date_obj.strftime('%Y-%m-%d')
         except ValueError:
             pass
 

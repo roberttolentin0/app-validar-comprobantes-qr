@@ -65,7 +65,7 @@ def parse_qr_code(input_str):
 
     # Transformar parts de tipo ['-fdig-index.php_vr¿20609834774', 'td¿01', 'nd¿0002780', 'vs¿F002', "fec¿2024'06'06", 'mon¿2301.67']
     if '¿' in parts[0]:
-        parts = parsed_list_with_signs(parts)
+        parts = parse_list_with_signs(parts)
         print('parts sin ¿ : ', parts)
 
     # Transformar parts si el RUC de la empresa está en la posición 3
