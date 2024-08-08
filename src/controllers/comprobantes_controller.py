@@ -79,13 +79,14 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     print('Validando...')
     print(comprobante)
     estado_sunat = []
+    _fecha_emision = DateFormat.convert_str_to_date(comprobante.fecha_emision)
     data_comprobante = {
         "id": comprobante.id,
         "numRuc": comprobante.ruc,
         "codComp":  get_tipo_comprobante(id=comprobante.id_tipo_comprobante).cod_comprobante, # "01"
         "numeroSerie": comprobante.serie,
         "numero": comprobante.numero,
-        "fechaEmision": DateFormat.convert_date_to_ddmmyy(comprobante.fecha_emision), # "26/11/2023"
+        "fechaEmision": DateFormat.convert_date_to_ddmmyy(_fecha_emision), # "26/11/2023"
         "monto": comprobante.monto  # "22725.00"
     }
     estado_sunat = validar_comprobante(data_comprobante)
