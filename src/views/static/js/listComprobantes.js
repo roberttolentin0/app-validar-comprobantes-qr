@@ -3,7 +3,7 @@ const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
   autoWidth: false,
-  orderCellsTop: true, // Para que el ordenar solo afecte la primera fila
+  // orderCellsTop: true, // Para que el ordenar solo afecte la primera fila
   // language: {
   //   entries: {
   //     _: "Entradas",
