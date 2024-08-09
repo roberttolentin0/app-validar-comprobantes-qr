@@ -113,7 +113,7 @@ def list_all() -> List[Comprobante]:
 def get_comprobante_with_status(_id) -> ViewComprobanteEstados:
     print('Obtener comprobante')
     query = """
-        SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones
+        SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, created_at
 	    FROM public.view_comprobantes_con_estados WHERE id = %(id)s
     """
     parameters = {'id': _id}
@@ -131,7 +131,8 @@ def get_comprobante_with_status(_id) -> ViewComprobanteEstados:
                                 estado_comprobante=record[7],
                                 estado_ruc=record[8],
                                 cod_domiciliaria_ruc=record[9],
-                                observaciones=record[10])
+                                observaciones=record[10],
+                                created_at=record[11])
     return None
 
 def list_all_with_status() -> List[ViewComprobanteEstados]:
