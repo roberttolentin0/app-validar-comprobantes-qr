@@ -10,6 +10,7 @@ from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from ..routes.errors import ComprobanteAlreadyExistsError
 from ..services.validar_comprobante_sunat import validar_comprobante
 from ..utils.helpers import parsed_comprobante_with_status
+from ..utils.helpers import parse_qr_code
 from ..utils.DateFormat import DateFormat
 from ..utils.utils import measure_time
 
@@ -128,3 +129,40 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
         else:
             db_estado_comprobante.update(new_estado_comprobante)
     return estado_sunat
+
+def get_data_comprobante(data_form: dict, data_qr: str = None):
+    '''
+        param: data_form: diccionario con datos del formulario
+        param: data_qr: string con el código QR (opcional)
+        return: data_comprobante: diccionario con los datos del comprobante
+    '''
+
+    def parse_data(parsed_data):
+        id_tipo_comprobante = get_tipo_comprobante(cod_comprobante=parsed_data[1].strip()).id
+        fecha_emision = DateFormat.find_and_format_date(data=parsed_data[6]) if data_qr else parsed_data[6]
+
+        return {
+            'ruc': parsed_data[0].strip(),
+            'id_tipo_comprobante': id_tipo_comprobante,
+            'serie': parsed_data[2].strip(),
+            'numero': parsed_data[3].strip(),
+            'monto': parsed_data[5].strip(),
+            'fecha_emision': fecha_emision
+        }
+
+    if data_qr:
+        parsed_data_qr = parse_qr_code(data_qr)
+        data_comprobante = parse_data(parsed_data_qr)
+    else:
+        parsed_data_form = [
+            data_form['ruc'],
+            data_form['tipoComprobante'],
+            data_form['serie'],
+            data_form['numero'],
+            '',  # Placeholder para monto que se toma después
+            data_form['monto'],
+            data_form['fechaEmision']
+        ]
+        data_comprobante = parse_data(parsed_data_form)
+
+    return data_comprobante
