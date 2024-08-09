@@ -17,6 +17,7 @@ class ViewComprobanteEstados:
     cod_domiciliaria_ruc: str
     observaciones: str
     id_tipo_comprobante: Optional[int] = None
+    created_at: Optional[datetime] = None
 
     def to_json(self):
         return {

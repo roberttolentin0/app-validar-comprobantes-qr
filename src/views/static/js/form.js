@@ -3,6 +3,7 @@ const inputDataQr = document.getElementById("dataQr");
 const formDataComprobante = document.getElementById("formDataComprobante");
 var clickSubmit = false;
 
+
 formQr.addEventListener("submit", (event) => {
   event.preventDefault();
   if (clickSubmit) {
@@ -23,6 +24,7 @@ formQr.addEventListener("submit", (event) => {
     clickSubmit = false;
     return;
   }
+  loading.classList.add("loading");
   console.log('fomrQR', formQr)
   const formData = new FormData(formQr);
   formData.forEach(function(value, key){
@@ -33,7 +35,7 @@ formQr.addEventListener("submit", (event) => {
     method: "POST",
     body: formData,
   })
-    .then(response => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then(errorData => {
@@ -63,7 +65,10 @@ formQr.addEventListener("submit", (event) => {
       Swal.fire("No se creo!", errorMessage, "error");
       clickSubmit = false;
     })
-    .finally(() => inputDataQr.value = "");
+    .finally(() => {
+      inputDataQr.value = ""
+      loading.classList.remove("loading")
+    });
 });
 
 formDataComprobante.addEventListener("submit", (event) => {

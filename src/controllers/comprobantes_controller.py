@@ -37,6 +37,11 @@ def list_with_status() -> List[ViewComprobanteEstados]:
         comprobante = parsed_comprobante_with_status(comprobante)
     return comprobantes_estados
 
+def list_with_status_today() -> List[ViewComprobanteEstados]:
+    comprobantes_estados = db_comprobante.list_all_with_status_today()
+    for comprobante in comprobantes_estados:
+        comprobante = parsed_comprobante_with_status(comprobante)
+    return comprobantes_estados
 
 def list_tipo_comprobante() -> List[TipoComprobante]:
     return db_tipo_comprobante.list_all_type()
@@ -73,6 +78,20 @@ def validar_en_sunat() -> list:
     print(f'-- Comprobantes validados: {len(estados_sunat)}/{len(comprobantes_sin_estado)}', estados_sunat)
     return estados_sunat
 
+@measure_time
+def validar_en_sunat_comprobantes_del_dia() -> list:
+    estados_sunat = []
+    comprobantes_sin_estado = db_comprobante.list_statusless_comprobante_del_dia()
+    print('comprobantes_sin_estado_del_dia', comprobantes_sin_estado, len(comprobantes_sin_estado))
+    if comprobantes_sin_estado is None:
+        raise Exception('No hay comprobantes sin estado')
+
+    for comprobante in comprobantes_sin_estado:
+        estado_sunat = validar_en_sunat_individual(comprobante)
+        estados_sunat.append(estado_sunat)
+        # Validar comprobantes con la API Sunat
+    print(f'-- Comprobantes del dia validados: {len(estados_sunat)}/{len(comprobantes_sin_estado)}', estados_sunat)
+    return estados_sunat
 
 @measure_time
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:

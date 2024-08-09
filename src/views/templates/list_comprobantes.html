@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+	<!--Responsive Extension Datatables CSS-->
+	<link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/2.0.4/css/dataTables.dataTables.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/datetime/1.5.2/css/dataTables.dateTime.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/searchpanes/2.3.1/css/searchPanes.dataTables.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <!-- Tabla de comprobantes -->
+    <div class="mx-auto my-4 wrapper">
+        {% include 'table_comprobantes.html' %}
+    </div>
+    <div id="jsLoading" class="" role="status"></div>
+{% endblock %}
+
+{% block script %}
+    <!--Datatables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/datetime/1.5.2/js/dataTables.dateTime.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/searchpanes/2.3.1/js/dataTables.searchPanes.min.js"></script>
+    <script>
+        // Accede a los datos de Flask pasados a la plantilla HTML utilizando Jinja2
+        var comprobantes = {{ comprobantes|tojson|safe }};
+        console.log('comprobantes', comprobantes)
+    </script>
+    <script src="{{ url_for('static', filename = 'js/listComprobantes.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/form.js') }}"></script>
+{% endblock %}

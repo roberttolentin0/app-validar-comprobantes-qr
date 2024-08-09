@@ -1,4 +1,3 @@
-console.log("comprobantes");
 const loading = document.getElementById("jsLoading");
 const dataTablesOptions = {
   responsive: true,
@@ -44,6 +43,7 @@ const dataTablesOptions = {
       text: "Print",
     },
   ],
+  pageLength: 100
 };
 
 const tablaComprobantes = new DataTable(
@@ -248,9 +248,78 @@ function validarComprobante(id) {
     .finally(() => loading.classList.remove("loading"));
 }
 
+function validarMasivamenteDelDia() {
+  Swal.fire({
+    title: "¿Validar comprobantes del día?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#34d399",
+    cancelButtonColor: "#fca5a5",
+    confirmButtonText: "Validar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      validarComprobantesDelDia();
+    }
+  });
+}
+
+function validarComprobantesDelDia() {
+  loading.classList.add("loading");
+  const url = "/api/validar/comprobantes_del_dia";
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then((errorData) => {
+          const error = new Error("Respuesta no satisfactoria");
+          error.data = errorData;
+          error.status = response.status;
+          throw error;
+        });
+      }
+      return response.json();
+    })
+    .then((responseJson) => {
+      Swal.fire(
+        "Validaciones completadas",
+        `${responseJson.info}`,
+        "success"
+      ).then(() => {
+        location.reload();
+      });
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data) {
+        // Error del servidor
+        errorMessage = `Error del servidor: ${
+          error.data.message || JSON.stringify(error.data)
+        }`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      if (error.status === 404) {
+        Swal.fire("No se validaron", errorMessage, "info");
+        return;
+      }
+      console.error(errorMessage);
+      Swal.fire("Error en la validación", errorMessage, "error").then(() => {
+        location.reload();
+      });
+    })
+    .finally(() => loading.classList.remove("loading"));
+}
+
+
 function validarMasivamente() {
   Swal.fire({
-    title: "¿Validar comprobantes?",
+    title: "¿Validar comprobantes no validados?",
     icon: "question",
     showCancelButton: true,
     confirmButtonColor: "#34d399",

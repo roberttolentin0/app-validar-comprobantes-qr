@@ -69,10 +69,21 @@ def create_comprobante():
                 id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
             # Create
             new_comprobante = comprobantes_controller.create(comprobante)
+            msg = 'success'
+            # Modo donde se verfica en Sunat apenas se Scannea
+            # try:
+            #     estado_sunat = comprobantes_controller.validar_en_sunat_individual(new_comprobante)
+            #     print('estado_sunat', estado_sunat)
+            #     if not estado_sunat:
+            #         msg = msg + ', Pero no se pudo validar en SUNAT.'
+            # except ComprobanteSunatError as e:
+            #     Logger.add_to_log("error", str(e))
+            #     msg = f'{msg}, Pero con errores al validar en SUNAT. {str(e)}'
+
             comprobante_with_status = comprobantes_controller.get_comprobante_status_by_id(
                 new_comprobante.id)
             print('new_comprobante', comprobante_with_status)
-            return jsonify({'message': 'success', 'new_comprobante': comprobante_with_status.to_json()}), 200
+            return jsonify({'message': msg, 'new_comprobante': comprobante_with_status.to_json()}), 200
     except ComprobanteAlreadyExistsError as e:
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
@@ -118,6 +129,22 @@ def validar_comprobantes():
         Logger.add_to_log("error", traceback.format_exc())
         return jsonify({'message': f"Error en validar comprobantes: {e}"}), 500
 
+@api_scope.route('/validar/comprobantes_del_dia', methods=['POST'])
+def validar_comprobantes_del_dia():
+    try:
+        if request.method == 'POST':
+            estados_sunat = comprobantes_controller.validar_en_sunat_comprobantes_del_dia()
+            if not estados_sunat:
+                return jsonify({'message': "No hay comprobantes a validar"}), 404
+            return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}'}), 200
+    except ComprobanteSunatError as e:
+        return jsonify({'message': f"Verificar comprobantes '{e}'"}), 500
+    except ConnectionError as e:
+        return jsonify({'message': f"Verificar la Conexión a Internet"}), 500
+    except Exception as e:
+        Logger.add_to_log("error", str(e))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': f"Error en validar comprobantes: {e}"}), 500
 
 @api_scope.route('/validar/comprobante', methods=['GET', 'POST'])
 def validar_comprobante():
