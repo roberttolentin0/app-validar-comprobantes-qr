@@ -3,6 +3,7 @@ const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
   autoWidth: false,
+  orderCellsTop: true, // Para que el ordenar solo afecte la primera fila
   // language: {
   //   entries: {
   //     _: "Entradas",
@@ -19,13 +20,13 @@ const dataTablesOptions = {
         placeholder: "Ingresa busqueda",
       },
     },
-    topEnd: "pageLength",
+    topEnd: "info",
     bottomStart: {
       paging: {
         numbers: 5,
       },
     },
-    bottomEnd: "info",
+    bottomEnd: "pageLength",
     bottom2End: "buttons",
   },
   buttons: [
@@ -43,7 +44,22 @@ const dataTablesOptions = {
       text: "Print",
     },
   ],
-  pageLength: 100
+  pageLength: 100,
+  initComplete: function () {
+    // Búsqueda por columnas
+    this.api()
+      .columns()
+      .every(function () {
+        var that = this;
+
+        // Aplica la búsqueda al input de cada columna
+        $('input', this.header()).on('keyup change clear', function () {
+          if (that.search() !== this.value) {
+            that.search(this.value).draw();
+          }
+        });
+      });
+  },
 };
 
 const tablaComprobantes = new DataTable(
@@ -57,6 +73,7 @@ function addComprobanteToTable(comprobante) {
   tablaComprobantes.row
     .add([
       `<span style="font-size: 0.7rem"}>${comprobante.id}</span>`,
+      comprobante.created_at,
       comprobante.ruc,
       comprobante.fecha_emision,
       comprobante.serie,
@@ -152,7 +169,7 @@ function eliminarComprobante(id) {
       id: id,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -214,7 +231,7 @@ function validarComprobante(id) {
       id: id,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -272,7 +289,7 @@ function validarComprobantesDelDia() {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -341,7 +358,7 @@ function validarComprobantes() {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {

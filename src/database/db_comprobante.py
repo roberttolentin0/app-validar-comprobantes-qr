@@ -155,7 +155,8 @@ def list_all_with_status() -> List[ViewComprobanteEstados]:
                                 estado_comprobante=record[7],
                                 estado_ruc=record[8],
                                 cod_domiciliaria_ruc=record[9],
-                                observaciones=record[10])
+                                observaciones=record[10],
+                                created_at=record[11])
         comprobantes.append(comprobante)
     return comprobantes
 

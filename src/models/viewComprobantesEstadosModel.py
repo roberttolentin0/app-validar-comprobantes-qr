@@ -31,5 +31,6 @@ class ViewComprobanteEstados:
             'estado_comprobante': self.estado_comprobante,
             'estado_ruc': self.estado_ruc,
             'cod_domiciliaria_ruc': self.cod_domiciliaria_ruc,
-            'observaciones': self.observaciones
+            'observaciones': self.observaciones,
+            'created_at': self.created_at
         }

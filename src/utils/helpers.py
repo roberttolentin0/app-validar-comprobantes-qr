@@ -15,11 +15,12 @@ def parsed_comprobante_with_status(_comprobante: ViewComprobanteEstados) -> View
     # Mapea la condición de domicilio del contribuyente
     _comprobante.cod_domiciliaria_ruc = CONDICION_DOMICILIO_CONTRIBUYENTE.get(str(_comprobante.cod_domiciliaria_ruc), '')
     _comprobante.fecha_emision = DateFormat.convert_date_to_ddmmyy(_comprobante.fecha_emision)
+    _comprobante.created_at = DateFormat.convert_date_to_ddmmyy(_comprobante.created_at)
     return _comprobante
 
 
 def convert_to_postgres_format(amount_str):
-    # Eliminar comas que están seguidas de tres dígitos (separadores de miles)
+    ''' Para los montos eliminar comas que están seguidas de tres dígitos (separadores de miles) '''
     amount_str = re.sub(r'(?<=\d),(?=\d{3}\b)', '', amount_str)
     # Reemplazar la coma decimal por un punto decimal
     amount_str = amount_str.replace(',', '.')
