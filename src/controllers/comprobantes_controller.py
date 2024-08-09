@@ -25,6 +25,13 @@ def create(comprobante_: Comprobante) -> Comprobante:
 
 
 def delete_comprobante(comprobante_: Comprobante) -> Comprobante:
+    estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante_.id)
+    if estado_comprobante.estado_comprobante == 1:
+        raise Exception('No se puede eliminar un comprobante con estado ACEPTADO')
+
+    if estado_comprobante:
+        db_estado_comprobante.delete_by_id_comprobante(estado_comprobante)
+
     return db_comprobante.delete(comprobante_)
 
 

@@ -45,6 +45,16 @@ def update(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
     return EstadoComprobante(**estado_dict)
 
 
+def delete_by_id_comprobante(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
+    query = """
+        DELETE FROM public.estado_comprobante
+        WHERE id_comprobante = %(id_comprobante)s
+    """
+    parameters = {'id_comprobante': estado_comprobante.id_comprobante}
+    connection._fetch_none(query, parameters)
+    return estado_comprobante
+
+
 def get_estado_comprobante_by_id(_id) -> EstadoComprobante:
     query = """
         SELECT id, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, updated_at, created_at, id_comprobante
