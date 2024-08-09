@@ -137,7 +137,7 @@ def get_comprobante_with_status(_id) -> ViewComprobanteEstados:
 def list_all_with_status() -> List[ViewComprobanteEstados]:
     print('Entro list all status')
     query = """
-        SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones
+        SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, created_at
 	    FROM public.view_comprobantes_con_estados;
     """
     records = connection._fetch_all(query=query)
@@ -165,24 +165,10 @@ def list_all_with_status_today() -> List[ViewComprobanteEstados]:
     today = today.strftime("%Y-%m-%d")
     query = """
         SELECT
-            c.id,
-            c.ruc,
-            c.fecha_emision,
-            c.serie,
-            c.numero,
-            c.monto,
-            ( SELECT tp.descripcion AS tipo_comprobante
-                FROM tipo_comprobante tp
-                WHERE tp.id = c.id_tipo_comprobante) AS tipo_comprobante,
-            ec.estado_comprobante,
-            ec.estado_ruc,
-            ec.cod_domiciliaria_ruc,
-            ec.observaciones,
-            c.created_at
-        FROM comprobantes c
-            LEFT JOIN estado_comprobante ec ON c.id = ec.id_comprobante
-        WHERE c.created_at = %(created_at)s
-        ORDER BY c.id DESC
+            id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, created_at
+	    FROM public.view_comprobantes_con_estados
+        WHERE created_at = %(created_at)s
+        ORDER BY id DESC
         ;
     """
     parameters = {'created_at': today}

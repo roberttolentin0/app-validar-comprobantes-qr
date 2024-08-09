@@ -250,7 +250,7 @@ function validarComprobante(id) {
 
 function validarMasivamenteDelDia() {
   Swal.fire({
-    title: "¿Validar comprobantes del día?",
+    title: "¿Validar comprobantes registrados en el día?",
     icon: "question",
     showCancelButton: true,
     confirmButtonColor: "#34d399",

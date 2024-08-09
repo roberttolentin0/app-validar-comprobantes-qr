@@ -9,7 +9,6 @@ from ..models.comprobanteModel import Comprobante
 from ..routes.errors import ComprobanteAlreadyExistsError, ComprobanteSunatError
 from ..utils.DateFormat import DateFormat
 from ..utils.Logger import Logger
-from ..utils.helpers import parse_qr_code
 
 api_scope = Blueprint("api", __name__)
 
@@ -29,31 +28,31 @@ def create_comprobante():
             data = request.form
             data_qr = data.get('dataQr', None)
             print('Crear permiso: Data QR', data_qr)
-            if data_qr is not None:
-                # Crear por DATA QR
-                parsed_data_qr = parse_qr_code(data_qr)
-                fecha = DateFormat.find_and_format_date(data=parsed_data_qr[6])
-                id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
-                data_comprobante = {
-                    'ruc': parsed_data_qr[0].strip(),
-                    'id_tipo_comprobante': id_tipo_comprobante,
-                    'serie': parsed_data_qr[2].strip(),
-                    'numero': parsed_data_qr[3].strip(),
-                    'monto': parsed_data_qr[5].strip(),
-                    'fecha_emision': fecha
-                }
-            else:
-                # Crear Manualmente
-                id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=data['tipoComprobante'].strip()).id
-                data_comprobante = {
-                    'ruc': data['ruc'].strip(),
-                    'id_tipo_comprobante': id_tipo_comprobante,
-                    'serie': data['serie'].strip(),
-                    'numero': data['numero'].strip(),
-                    'monto': data['monto'].strip(),
-                    'fecha_emision': data['fechaEmision']
-                }
-
+            # if data_qr is not None:
+            #     # Crear por DATA QR
+            #     parsed_data_qr = parse_qr_code(data_qr)
+            #     fecha = DateFormat.find_and_format_date(data=parsed_data_qr[6])
+            #     id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=parsed_data_qr[1].strip()).id
+            #     data_comprobante = {
+            #         'ruc': parsed_data_qr[0].strip(),
+            #         'id_tipo_comprobante': id_tipo_comprobante,
+            #         'serie': parsed_data_qr[2].strip(),
+            #         'numero': parsed_data_qr[3].strip(),
+            #         'monto': parsed_data_qr[5].strip(),
+            #         'fecha_emision': fecha
+            #     }
+            # else:
+            #     # Crear Manualmente
+            #     id_tipo_comprobante = comprobantes_controller.get_tipo_comprobante(cod_comprobante=data['tipoComprobante'].strip()).id
+            #     data_comprobante = {
+            #         'ruc': data['ruc'].strip(),
+            #         'id_tipo_comprobante': id_tipo_comprobante,
+            #         'serie': data['serie'].strip(),
+            #         'numero': data['numero'].strip(),
+            #         'monto': data['monto'].strip(),
+            #         'fecha_emision': data['fechaEmision']
+            #     }
+            data_comprobante = comprobantes_controller.get_data_comprobante(data_form=data, data_qr=data_qr)
             print('data_comprobante', data_comprobante)
             # Verificar que todas las claves tengan valores
             for key, value in data_comprobante.items():
@@ -69,16 +68,55 @@ def create_comprobante():
                 id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
             # Create
             new_comprobante = comprobantes_controller.create(comprobante)
-            msg = 'success'
-            # Modo donde se verfica en Sunat apenas se Scannea
-            # try:
-            #     estado_sunat = comprobantes_controller.validar_en_sunat_individual(new_comprobante)
-            #     print('estado_sunat', estado_sunat)
-            #     if not estado_sunat:
-            #         msg = msg + ', Pero no se pudo validar en SUNAT.'
-            # except ComprobanteSunatError as e:
-            #     Logger.add_to_log("error", str(e))
-            #     msg = f'{msg}, Pero con errores al validar en SUNAT. {str(e)}'
+            comprobante_with_status = comprobantes_controller.get_comprobante_status_by_id(
+                new_comprobante.id)
+            print('new_comprobante', comprobante_with_status)
+            return jsonify({'message': 'success', 'new_comprobante': comprobante_with_status.to_json()}), 200
+    except ComprobanteAlreadyExistsError as e:
+        Logger.add_to_log("error", str(e))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': f"Error: {e}"}), 500
+    except ValueError as e:
+        return jsonify({'message': f"CÓDIGO QR INCORRECTO: {e}"}), 500
+    except Exception as e:
+        Logger.add_to_log("error", str(e))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': f'CÓDIGO QR INCORRECTO, INGRESE MANUALMENTE...  Detalle: {e}'}), 500
+
+
+@api_scope.route('/create_and_validate', methods=['POST'])
+def create_and_validate():
+    try:
+        if request.method == 'POST':
+            data = request.form
+            data_qr = data.get('dataQr', None)
+            print('Crear permiso: Data QR', data_qr)
+            data_comprobante = comprobantes_controller.get_data_comprobante(data_form=data, data_qr=data_qr)
+            print('data_comprobante', data_comprobante)
+            # Verificar que todas las claves tengan valores
+            for key, value in data_comprobante.items():
+                if value is None or (isinstance(value, str) and not value.strip()):
+                    raise ValueError(f"El valor para '{key}' no puede estar vacío o ser nulo.")
+
+            comprobante = Comprobante(
+                ruc=data_comprobante['ruc'],
+                fecha_emision=data_comprobante['fecha_emision'],
+                serie=data_comprobante['serie'],
+                numero=data_comprobante['numero'],
+                monto=data_comprobante['monto'],
+                id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
+            # Create
+            new_comprobante = comprobantes_controller.create(comprobante)
+            msg = 'Creado'
+            # Verificar en Sunat apenas se Scannea
+            try:
+                estado_sunat = comprobantes_controller.validar_en_sunat_individual(new_comprobante)
+                # print('estado_sunat', estado_sunat)
+                if not estado_sunat:
+                    msg = msg + ', Pero no se pudo validar en SUNAT.'
+            except ComprobanteSunatError as e:
+                Logger.add_to_log("error", str(e))
+                msg = f'{msg}, Pero con errores al validar en SUNAT. {str(e)}'
 
             comprobante_with_status = comprobantes_controller.get_comprobante_status_by_id(
                 new_comprobante.id)

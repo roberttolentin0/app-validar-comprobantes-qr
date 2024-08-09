@@ -6,6 +6,7 @@ from ..constans import RUC_EMPRESA
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from .DateFormat import DateFormat
 
+
 def parsed_comprobante_with_status(_comprobante: ViewComprobanteEstados) -> ViewComprobanteEstados:
     # Mapea el estado del comprobante
     _comprobante.estado_comprobante = ESTADO_COMPROBANTE.get(str(_comprobante.estado_comprobante), '')
@@ -57,7 +58,7 @@ def parse_list_with_signs(lista_entrada):
     return resultado
 
 
-def parse_qr_code(input_str):
+def parse_qr_code(input_str: str) -> list:
     '''input_str: 20100127165|01|F100|00451161|99.61|653.06|2024-05-22|6|20609699982|hgH0bEf7HK57HHPG1p6ZihmbQvI='''
     # Separar la entrada usando el delimitador '|' or ']'
     parts = re.split(r'\||\]|\/', input_str)
