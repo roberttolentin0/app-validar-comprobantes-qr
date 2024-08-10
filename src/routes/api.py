@@ -107,14 +107,14 @@ def create_and_validate():
                 id_tipo_comprobante=data_comprobante['id_tipo_comprobante'])
             # Create
             new_comprobante = comprobantes_controller.create(comprobante)
-            msg = 'Creado'
+            msg = ''
             # Verificar en Sunat apenas se Scannea
             try:
                 estado_sunat = comprobantes_controller.validar_en_sunat_individual(new_comprobante)
                 # print('estado_sunat', estado_sunat)
                 if not estado_sunat:
                     msg = msg + ', Pero no se pudo validar en SUNAT.'
-            except ComprobanteSunatError as e:
+            except Exception as e:
                 Logger.add_to_log("error", str(e))
                 msg = f'{msg}, Pero con errores al validar en SUNAT. {str(e)}'
 
@@ -157,7 +157,9 @@ def validar_comprobantes():
             estados_sunat = comprobantes_controller.validar_en_sunat()
             if not estados_sunat:
                 return jsonify({'message': "No hay comprobantes a validar"}), 404
-            return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}'}), 200
+
+        comprobantes_dict = get_comprobantes_with_status()
+        return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}', 'data_comprobantes': comprobantes_dict}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobantes '{e}'"}), 500
     except ConnectionError as e:
@@ -174,7 +176,9 @@ def validar_comprobantes_del_dia():
             estados_sunat = comprobantes_controller.validar_en_sunat_comprobantes_del_dia()
             if not estados_sunat:
                 return jsonify({'message': "No hay comprobantes a validar"}), 404
-            return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}'}), 200
+
+            comprobantes_dict = get_comprobantes_with_status_today()
+            return jsonify({'message': 'success', 'info': f'Se verifico {len(estados_sunat)}', 'data_comprobantes': comprobantes_dict}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobantes '{e}'"}), 500
     except ConnectionError as e:
@@ -193,10 +197,11 @@ def validar_comprobante():
             comprobante = comprobantes_controller.get_comprobante_by_id(id)
             estado_sunat = comprobantes_controller.validar_en_sunat_individual(
                 comprobante)
+            comprobante_with_status = comprobantes_controller.get_comprobante_status_by_id(comprobante.id)
             print('Validado individualmente: ', estado_sunat)
             if not estado_sunat:
                 return jsonify({'message': "Comprobante no validado"}), 404
-            return jsonify({'message': 'success', 'data': estado_sunat}), 200
+            return jsonify({'message': 'success', 'data_comprobante': comprobante_with_status}), 200
     except ComprobanteSunatError as e:
         return jsonify({'message': f"Verificar comprobante '{e}'"}), 500
     except ConnectionError as e:
@@ -205,3 +210,12 @@ def validar_comprobante():
         Logger.add_to_log("error", str(e))
         Logger.add_to_log("error", traceback.format_exc())
         return jsonify({'message': f"Error en validar comprobante '{e}'"}), 500
+
+
+def get_comprobantes_with_status()-> dict:
+    comprobantes_list = comprobantes_controller.list_with_status()
+    return [comprobante.to_json() for comprobante in comprobantes_list]
+
+def get_comprobantes_with_status_today()-> dict:
+    comprobantes_list = comprobantes_controller.list_with_status_today()
+    return [comprobante.to_json() for comprobante in comprobantes_list]

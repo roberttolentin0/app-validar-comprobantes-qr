@@ -104,7 +104,6 @@ def validar_en_sunat_comprobantes_del_dia() -> list:
 @measure_time
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     print('Validando...')
-    print(comprobante)
     estado_sunat = []
     _fecha_emision = DateFormat.convert_str_to_date(comprobante.fecha_emision)
     data_comprobante = {

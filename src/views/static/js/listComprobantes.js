@@ -1,4 +1,10 @@
-const loading = document.getElementById("jsLoading");
+document.addEventListener("DOMContentLoaded", function () {
+  showLoadingData();
+  // Aquí llamas a la función que carga los datos en la tabla
+  initLoadDataToTable(comprobantes);
+  hideLoadingData();
+});
+
 const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
@@ -89,8 +95,57 @@ function addComprobanteToTable(comprobante) {
     .draw();
 }
 
-/** Agregar filas */
-comprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
+function initLoadDataToTable(listComprobantes) {
+  showLoading(true)
+  /** Agregar filas */
+  listComprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
+  showLoading(false)
+}
+
+function loadDataToTable(listComprobantes) {
+  /** Limpiar todas las filas existentes en la tabla */
+  tablaComprobantes.clear().draw();
+  initLoadDataToTable(listComprobantes)
+}
+
+function updateComprobanteInTable(comprobante) {
+  /** Actualiza solo la fila de donde este el comprobante */
+  // Buscar la fila que tiene el ID del comprobante
+  var rowNode = tablaComprobantes.row(function(idx, data, node) {
+    return data[0].includes(comprobante.id); // ID está en la primera columna
+  });
+
+  if (rowNode.length) {
+    // Actualizar la fila con nuevos datos
+    rowNode.data([
+      `<span style="font-size: 0.7rem">${comprobante.id}</span>`,
+      comprobante.created_at,
+      comprobante.ruc,
+      comprobante.fecha_emision,
+      comprobante.serie,
+      comprobante.numero,
+      comprobante.monto,
+      comprobante.tipo_comprobante,
+      renderRowStatus(comprobante.estado_comprobante),
+      renderRowStatus(comprobante.estado_ruc),
+      renderRowStatus(comprobante.cod_domiciliaria_ruc),
+      `<span style="font-size: 0.7rem">${comprobante.observaciones || ''}</span>`,
+      renderRowOptions(comprobante),
+    ]).draw(false);  // El false evita que la tabla se recargue completamente
+  } else {
+    // Si no se encuentra la fila, agregarla como una nueva
+    addComprobanteToTable(comprobante);
+  }
+}
+
+function updateMultipleComprobantes(listComprobantes) {
+  /** Si se quiere actualizar solo algunas filas */
+  showLoading(true)
+  listComprobantes.forEach((comprobante) => {
+    updateComprobanteInTable(comprobante);
+  });
+  showLoading(false)
+}
 
 function renderRowStatus(status) {
   const colorStatus = {
@@ -111,12 +166,12 @@ function renderRowStatus(status) {
 function renderRowOptions(comprobante) {
   const observaciones = comprobante.observaciones || "Sin Observaciones";
   const buttonValidar = `
-        <button onclick="validar(${comprobante.id})" class="btn btn-light col-3 col-sm-4">
+        <button onclick="validar(${comprobante.id})" class="btn btn-light col-6">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </button>
     `;
   const buttonEliminar = `
-        <button onclick="eliminar(${comprobante.id})" class="btn btn-light col-3 col-sm-4">
+        <button onclick="eliminar(${comprobante.id})" class="btn btn-light col-6">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
         </button>
     `;
@@ -178,7 +233,7 @@ function eliminarComprobante(id) {
           throw error;
         });
       }
-      response.json();
+      return response.json();
     })
     .then((data) => {
       console.log(data);
@@ -242,11 +297,11 @@ function validarComprobante(id) {
       }
       return response.json();
     })
-    .then((data) => {
-      // console.log('data-', data);
-      Swal.fire("Validacion completada", "", "success").then(() => {
-        location.reload();
-      });
+    .then((responseJson) => {
+      console.log('responseJson', responseJson);
+      Swal.fire("Validacion completada", "", "success")
+      const dataComprobante = responseJson.data_comprobante;
+      updateComprobanteInTable(comprobante=dataComprobante)
     })
     .catch((error) => {
       let errorMessage;
@@ -281,7 +336,7 @@ function validarMasivamenteDelDia() {
 }
 
 function validarComprobantesDelDia() {
-  loading.classList.add("loading");
+  showLoading(true)
   const url = "/api/validar/comprobantes_del_dia";
   fetch(url, {
     method: "POST",
@@ -306,9 +361,9 @@ function validarComprobantesDelDia() {
         "Validaciones completadas",
         `${responseJson.info}`,
         "success"
-      ).then(() => {
-        location.reload();
-      });
+      )
+      const dataComprobantes = responseJson.data_comprobantes;
+      updateMultipleComprobantes(listComprobantes=dataComprobantes);
     })
     .catch((error) => {
       let errorMessage;
@@ -330,7 +385,7 @@ function validarComprobantesDelDia() {
         location.reload();
       });
     })
-    .finally(() => loading.classList.remove("loading"));
+    .finally(() => showLoading(false));
 }
 
 
@@ -350,7 +405,7 @@ function validarMasivamente() {
 }
 
 function validarComprobantes() {
-  loading.classList.add("loading");
+  showLoading(true);
   const url = "/api/validar/comprobantes";
   fetch(url, {
     method: "POST",
@@ -375,9 +430,9 @@ function validarComprobantes() {
         "Validaciones completadas",
         `${responseJson.info}`,
         "success"
-      ).then(() => {
-        location.reload();
-      });
+      )
+      const dataComprobantes = responseJson.data_comprobantes;
+      loadDataToTable(listComprobantes=dataComprobantes);
     })
     .catch((error) => {
       let errorMessage;
@@ -399,5 +454,18 @@ function validarComprobantes() {
         location.reload();
       });
     })
-    .finally(() => loading.classList.remove("loading"));
+    .finally(() => showLoading(false));
+}
+
+
+const showLoadingData = () => {
+  // Mostrar el elemento de carga y ocultar el contenido
+  document.getElementById("jsLoadingTable").style.display = "flex";
+  document.getElementById("tablaComprobantes").style.display = "none";
+}
+
+const hideLoadingData = () => {
+  // Ocultar el elemento de carga y mostrar el contenido
+  document.getElementById("jsLoadingTable").style.display = "none";
+  document.getElementById("tablaComprobantes").style.display = "block";
 }

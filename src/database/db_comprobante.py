@@ -175,7 +175,7 @@ def list_all_with_status_today() -> List[ViewComprobanteEstados]:
     """
     parameters = {'created_at': today}
     records = connection._fetch_all(query=query, parameters=parameters)
-    print('records', records)
+    # print('records', records)
     comprobantes = []
     for record in records:
         comprobante = ViewComprobanteEstados(
@@ -239,7 +239,7 @@ def list_statusless_comprobante_del_dia() -> list[Comprobante]:
     """
     parameters = {'created_at': today}
     records = connection._fetch_all(query=query, parameters=parameters)
-    print('records', records)
+    # print('records', records)
 
     comprobantes = []
     for record in records:

@@ -158,13 +158,13 @@ function guardarValidar() {
     })
     .then(responseJson => {
       const comprobante = responseJson.new_comprobante;
-      const msg = responseJson.message;
+      const msg = responseJson.message || '';
       addComprobanteToTable(comprobante)
       successAutoClose("Comprobante agregado", 500);
       clickSubmit = false
       console.log('msg', msg)
-      if (msg.includes('error')) {
-        Swal.fire("Alerta!!", responseJson.message, "warning");
+      if (msg != '') {
+        Swal.fire("Alerta!!", msg, "warning");
       }
     })
     .catch((error) => {
@@ -183,4 +183,3 @@ function guardarValidar() {
     .finally(() => showLoading(false));
 };
 
-const showLoading = (show) => show ? loading.classList.add("loading"): loading.classList.remove("loading");

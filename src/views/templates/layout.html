@@ -16,6 +16,7 @@
         <main>
             {% block content %}{% endblock %}
         </main>
+        <div id="jsLoading" class="" role="status"></div>
     </div>
 
     <!-- sweetalert2 -->
@@ -26,6 +27,7 @@
     <!-- jQuery -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="{{ url_for('static', filename = 'js/toasts.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/main.js') }}"></script>
     {% block script %}{% endblock %}
 </body>
 </html>
