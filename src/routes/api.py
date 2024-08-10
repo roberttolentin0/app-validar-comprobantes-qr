@@ -15,11 +15,9 @@ api_scope = Blueprint("api", __name__)
 
 @api_scope.route('/comprobantes', methods=['GET'])
 def get_list():
-    comprobantes_list = comprobantes_controller.lists()
-    comprobantes_dict = [comprobante.to_json()
-                         for comprobante in comprobantes_list]
-    print(comprobantes_list)
-    return jsonify(comprobantes_dict)
+    comprobantes_dict = get_comprobantes_with_status()
+    # print(comprobantes_dict)
+    return jsonify(comprobantes_dict), 200
 
 @api_scope.route('/create_comprobante', methods=['POST'])
 def create_comprobante():

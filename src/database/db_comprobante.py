@@ -111,7 +111,6 @@ def list_all() -> List[Comprobante]:
     return comprobantes
 
 def get_comprobante_with_status(_id) -> ViewComprobanteEstados:
-    print('Obtener comprobante')
     query = """
         SELECT id, ruc, fecha_emision, serie, numero, monto, tipo_comprobante, estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, created_at
 	    FROM public.view_comprobantes_con_estados WHERE id = %(id)s
@@ -235,7 +234,7 @@ def list_statusless_comprobante_del_dia() -> list[Comprobante]:
             (ec.id_comprobante IS NULL
             OR ec.estado_comprobante IS NULL
             OR ec.estado_comprobante <> 1)
-    AND c.created_at = %(created_at)s
+        AND c.created_at = %(created_at)s
     """
     parameters = {'created_at': today}
     records = connection._fetch_all(query=query, parameters=parameters)

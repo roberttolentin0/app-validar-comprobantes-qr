@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   showLoadingData();
-  // Aquí llamas a la función que carga los datos en la tabla
-  initLoadDataToTable(comprobantes);
+  loadDataToTable(comprobantes)
+  // Deprecated: Por que este tipo de carga con forEach demora el renderizado del datatable
+  // listComprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
   hideLoadingData();
 });
 
@@ -50,7 +51,8 @@ const dataTablesOptions = {
       text: "Print",
     },
   ],
-  pageLength: 100,
+  deferRender: true,  // Activa el renderizado diferid
+  pageLength: 50,
   initComplete: function () {
     // Búsqueda por columnas
     this.api()
@@ -75,6 +77,31 @@ const tablaComprobantes = new DataTable(
   .adjust()
   .responsive.recalc();
 
+function loadDataToTable(listComprobantes) {
+  // Limpiar todas las filas existentes en la tabla
+  tablaComprobantes.clear().draw();
+
+  // Preparar un array de datos para insertar en bloque
+  const dataToAdd = listComprobantes.map((comprobante) => [
+    `<span style="font-size: 0.7rem">${comprobante.id}</span>`,
+    comprobante.created_at,
+    comprobante.ruc,
+    comprobante.fecha_emision,
+    comprobante.serie,
+    comprobante.numero,
+    comprobante.monto,
+    comprobante.tipo_comprobante,
+    renderRowStatus(comprobante.estado_comprobante),
+    renderRowStatus(comprobante.estado_ruc),
+    renderRowStatus(comprobante.cod_domiciliaria_ruc),
+    `<span style="font-size: 0.7rem">${comprobante.observaciones || ''}</span>`,
+    renderRowOptions(comprobante),
+  ]);
+
+  // Añadir los datos en bloque
+  tablaComprobantes.rows.add(dataToAdd).draw();
+}
+
 function addComprobanteToTable(comprobante) {
   tablaComprobantes.row
     .add([
@@ -93,19 +120,6 @@ function addComprobanteToTable(comprobante) {
       renderRowOptions(comprobante),
     ])
     .draw();
-}
-
-function initLoadDataToTable(listComprobantes) {
-  showLoading(true)
-  /** Agregar filas */
-  listComprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
-  showLoading(false)
-}
-
-function loadDataToTable(listComprobantes) {
-  /** Limpiar todas las filas existentes en la tabla */
-  tablaComprobantes.clear().draw();
-  initLoadDataToTable(listComprobantes)
 }
 
 function updateComprobanteInTable(comprobante) {
@@ -363,6 +377,7 @@ function validarComprobantesDelDia() {
         "success"
       )
       const dataComprobantes = responseJson.data_comprobantes;
+      // loadDataToTable(listComprobantes=dataComprobantes);
       updateMultipleComprobantes(listComprobantes=dataComprobantes);
     })
     .catch((error) => {

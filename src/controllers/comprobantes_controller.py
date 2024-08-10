@@ -39,6 +39,7 @@ def lists() -> List[Comprobante]:
     return db_comprobante.list_all()
 
 
+@measure_time
 def list_with_status() -> List[ViewComprobanteEstados]:
     comprobantes_estados = db_comprobante.list_all_with_status()
     for comprobante in comprobantes_estados:
@@ -90,7 +91,7 @@ def validar_en_sunat() -> list:
 def validar_en_sunat_comprobantes_del_dia() -> list:
     estados_sunat = []
     comprobantes_sin_estado = db_comprobante.list_statusless_comprobante_del_dia()
-    print('comprobantes_sin_estado_del_dia', comprobantes_sin_estado, len(comprobantes_sin_estado))
+    # print('comprobantes_sin_estado_del_dia', comprobantes_sin_estado, len(comprobantes_sin_estado))
     if comprobantes_sin_estado is None:
         raise Exception('No hay comprobantes sin estado')
 
@@ -103,7 +104,7 @@ def validar_en_sunat_comprobantes_del_dia() -> list:
 
 @measure_time
 def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
-    print('Validando...')
+    print("-- Iniciar función validar_en_sunat_individual --")
     estado_sunat = []
     _fecha_emision = DateFormat.convert_str_to_date(comprobante.fecha_emision)
     data_comprobante = {
@@ -116,6 +117,7 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
         "monto": comprobante.monto  # "22725.00"
     }
     estado_sunat = validar_comprobante(data_comprobante)
+
     if estado_sunat is not None:
         observaciones = estado_sunat.get('observaciones', None)
         if observaciones is not None and len(observaciones) > 0:
@@ -128,8 +130,8 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
             cod_domiciliaria_ruc=estado_sunat.get('condDomiRuc', None),
             observaciones=observaciones
         )
-        print('Estado comprobante: ', new_estado_comprobante)
         estado_comprobante = db_estado_comprobante.get_estado_comprobante_by_id(comprobante.id)
+        print(estado_comprobante)
         if estado_comprobante is None:
             db_estado_comprobante.create(new_estado_comprobante)
         else:

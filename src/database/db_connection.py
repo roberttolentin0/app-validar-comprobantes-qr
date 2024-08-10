@@ -32,6 +32,7 @@ class Connection:
                 "port": self.port
             }
             self.conn = psycopg2.connect(**conn_params)
+            # print("Conexión exitosa a la base de datos...")
             return self.conn
         except psycopg2.Error as e:
             Logger.add_to_log("error", str(e))
