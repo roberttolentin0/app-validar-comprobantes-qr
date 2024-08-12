@@ -65,6 +65,7 @@ def get_comprobante_status_by_id(id) -> ViewComprobanteEstados:
     return parsed_comprobante_with_status(comprobante)
 
 
+@measure_time
 def get_tipo_comprobante(id=None, cod_comprobante=None) -> TipoComprobante:
     tipos = db_tipo_comprobante.list_all_type()
     for tipo in tipos:
@@ -110,7 +111,7 @@ def validar_en_sunat_individual(comprobante: Comprobante) -> dict:
     data_comprobante = {
         "id": comprobante.id,
         "numRuc": comprobante.ruc,
-        "codComp":  get_tipo_comprobante(id=comprobante.id_tipo_comprobante).cod_comprobante, # "01"
+        "codComp": comprobante.cod_comprobante if comprobante.cod_comprobante else get_tipo_comprobante(id=comprobante.id_tipo_comprobante).cod_comprobante, # "01"
         "numeroSerie": comprobante.serie,
         "numero": comprobante.numero,
         "fechaEmision": DateFormat.convert_date_to_ddmmyy(_fecha_emision), # "26/11/2023"

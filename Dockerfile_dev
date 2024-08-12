@@ -1,0 +1,20 @@
+# FROM python:3.9.17-slim-buster
+FROM python:alpine3.18
+
+WORKDIR /home/app
+
+COPY requirements.txt .
+
+RUN \
+ apk add --no-cache python3 postgresql-libs && \
+ apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev postgresql-dev && \
+ python3 -m pip install -r requirements.txt --no-cache-dir && \
+ apk --purge del .build-deps && pip install gunicorn
+
+COPY . .
+
+COPY .env .env
+
+EXPOSE 5000
+# Config gunicorn para mostrar logs
+CMD gunicorn --bind 0.0.0.0:5000 --log-level=debug --access-logfile=- run:app

@@ -47,8 +47,13 @@ def get_comprobante_by_id(_id) -> Comprobante:
     ''' @params: id
         @return: comprobante '''
     query = """
-        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
-	    FROM public.comprobantes WHERE id = %(id)s
+        SELECT
+            id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at,
+            id_tipo_comprobante,
+            (SELECT tp.cod_comprobante
+           		FROM tipo_comprobante tp
+          		WHERE tp.id = c.id_tipo_comprobante) AS cod_comprobante
+	    FROM public.comprobantes c WHERE id = %(id)s
     """
     parameters = {'id': _id}
 
@@ -61,6 +66,7 @@ def get_comprobante_by_id(_id) -> Comprobante:
                         numero=record[4],
                         monto=record[5],
                         id_tipo_comprobante=record[8],
+                        cod_comprobante=record[9],
                         created_at=record[7])
     return None
 
@@ -195,7 +201,7 @@ def list_all_with_status_today() -> List[ViewComprobanteEstados]:
 
 def list_statusless_comprobante() -> list[Comprobante]:
     query = """
-        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante
+        SELECT id, ruc, fecha_emision, serie, numero, monto, updated_at, created_at, id_tipo_comprobante, cod_comprobante
 	    FROM public.view_comprobantes_sin_estados ORDER BY id DESC;
     """
     records = connection._fetch_all(query=query)
@@ -210,7 +216,8 @@ def list_statusless_comprobante() -> list[Comprobante]:
                               numero=record[4],
                               monto=record[5],
                               created_at=record[7],
-                              id_tipo_comprobante=record[8])
+                              id_tipo_comprobante=record[8],
+                              cod_comprobante=record[9])
         comprobantes.append(comprobante)
     return comprobantes
 
@@ -227,6 +234,9 @@ def list_statusless_comprobante_del_dia() -> list[Comprobante]:
             c.monto,
             c.created_at,
             c.id_tipo_comprobante,
+            (SELECT tp.cod_comprobante
+           		FROM tipo_comprobante tp
+          		WHERE tp.id = c.id_tipo_comprobante) AS cod_comprobante,
             ec.estado_comprobante
         FROM comprobantes c
         LEFT JOIN estado_comprobante ec ON c.id = ec.id_comprobante
@@ -250,6 +260,7 @@ def list_statusless_comprobante_del_dia() -> list[Comprobante]:
                               numero=record[4],
                               monto=record[5],
                               created_at=record[6],
-                              id_tipo_comprobante=record[7])
+                              id_tipo_comprobante=record[7],
+                              cod_comprobante=record[8])
         comprobantes.append(comprobante)
     return comprobantes
