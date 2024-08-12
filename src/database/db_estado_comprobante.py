@@ -7,7 +7,7 @@ connection = DBConnection()
 
 
 def create(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
-    print('-- Create Estado --')
+    print('Create Estado.')
     query = """
         INSERT INTO public.estado_comprobante
         (estado_comprobante, estado_ruc, cod_domiciliaria_ruc, observaciones, created_at, id_comprobante)
@@ -31,7 +31,7 @@ def create(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
 
 
 def update(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
-    print('-- Update estado --')
+    print('Update estado.')
     query = """
         UPDATE public.estado_comprobante
 	    SET estado_comprobante=%(estado_comprobante)s, estado_ruc=%(estado_ruc)s, cod_domiciliaria_ruc=%(cod_domiciliaria_ruc)s, observaciones=%(observaciones)s, updated_at=%(updated_at)s
@@ -41,8 +41,18 @@ def update(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
     estado_dict = estado_comprobante.to_json()
     estado_dict['updated_at'] = DateFormat.get_curr_time_peru()
     id_ = connection._fetch_lastrow_id(query, estado_dict)
-    print('id_ update', id_)
+    # print('id_ update', id_)
     return EstadoComprobante(**estado_dict)
+
+
+def delete_by_id_comprobante(estado_comprobante: EstadoComprobante) -> EstadoComprobante:
+    query = """
+        DELETE FROM public.estado_comprobante
+        WHERE id_comprobante = %(id_comprobante)s
+    """
+    parameters = {'id_comprobante': estado_comprobante.id_comprobante}
+    connection._fetch_none(query, parameters)
+    return estado_comprobante
 
 
 def get_estado_comprobante_by_id(_id) -> EstadoComprobante:

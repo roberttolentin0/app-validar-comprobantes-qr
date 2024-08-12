@@ -130,7 +130,7 @@ def validar_comprobante(data_comprobante):
             "fechaEmision": "30/11/2023",
             "monto": "22725.00"
         }
-    Return: Respuesta de la API Sunat
+    Return: { } Respuesta de la API Sunat
     """
     print('Comprobante: ', data_comprobante)
     MAX_INTENTOS = 10
@@ -155,8 +155,11 @@ def validar_comprobante(data_comprobante):
                 print(f"Intento {intentos} fallido, reintentando...")
         elif response.status_code == 422:
             response_data = response.json()
-            print('Error Response api sunat', response_data['message'])
-            raise ComprobanteSunatError(f"En comprobante #ID {data_comprobante['id']} | {data_comprobante['numeroSerie']} {data_comprobante['numero']}, Msg: {response_data['message']}")
+            msg_error = f"Rsp Sunat: {response_data['message']}"
+            data_comprobante['observaciones'] =[msg_error]
+            print('Error Response api sunat:', f"En el comprobante #ID {data_comprobante['id']} | {data_comprobante['numeroSerie']} {data_comprobante['numero']}, Msg: {response_data['message']}")
+            # raise ComprobanteSunatError(f"En el comprobante #ID {data_comprobante['id']} | {data_comprobante['numeroSerie']} {data_comprobante['numero']}, Msg: {response_data['message']}")
+            return data_comprobante
         else:
             print(f"Error al obtener Código de estado: {response.status_code}")
             print(response.text)

@@ -1,9 +1,16 @@
-console.log("comprobantes");
-const loading = document.getElementById("jsLoading");
+document.addEventListener("DOMContentLoaded", function () {
+  showLoadingData();
+  loadDataToTable(comprobantes)
+  // Deprecated: Por que este tipo de carga con forEach demora el renderizado del datatable
+  // listComprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
+  hideLoadingData();
+});
+
 const dataTablesOptions = {
   responsive: true,
   order: [[0, "desc"]],
   autoWidth: false,
+  // orderCellsTop: true, // Para que el ordenar solo afecte la primera fila
   // language: {
   //   entries: {
   //     _: "Entradas",
@@ -20,13 +27,13 @@ const dataTablesOptions = {
         placeholder: "Ingresa busqueda",
       },
     },
-    topEnd: "pageLength",
+    topEnd: "info",
     bottomStart: {
       paging: {
         numbers: 5,
       },
     },
-    bottomEnd: "info",
+    bottomEnd: "pageLength",
     bottom2End: "buttons",
   },
   buttons: [
@@ -44,6 +51,23 @@ const dataTablesOptions = {
       text: "Print",
     },
   ],
+  deferRender: true,  // Activa el renderizado diferid
+  pageLength: 50,
+  initComplete: function () {
+    // Búsqueda por columnas
+    this.api()
+      .columns()
+      .every(function () {
+        var that = this;
+
+        // Aplica la búsqueda al input de cada columna
+        $('input', this.header()).on('keyup change clear', function () {
+          if (that.search() !== this.value) {
+            that.search(this.value).draw();
+          }
+        });
+      });
+  },
 };
 
 const tablaComprobantes = new DataTable(
@@ -53,10 +77,36 @@ const tablaComprobantes = new DataTable(
   .adjust()
   .responsive.recalc();
 
+function loadDataToTable(listComprobantes) {
+  // Limpiar todas las filas existentes en la tabla
+  tablaComprobantes.clear().draw();
+
+  // Preparar un array de datos para insertar en bloque
+  const dataToAdd = listComprobantes.map((comprobante) => [
+    `<span style="font-size: 0.7rem">${comprobante.id}</span>`,
+    comprobante.created_at,
+    comprobante.ruc,
+    comprobante.fecha_emision,
+    comprobante.serie,
+    comprobante.numero,
+    comprobante.monto,
+    comprobante.tipo_comprobante,
+    renderRowStatus(comprobante.estado_comprobante),
+    renderRowStatus(comprobante.estado_ruc),
+    renderRowStatus(comprobante.cod_domiciliaria_ruc),
+    `<span style="font-size: 0.7rem">${comprobante.observaciones || ''}</span>`,
+    renderRowOptions(comprobante),
+  ]);
+
+  // Añadir los datos en bloque
+  tablaComprobantes.rows.add(dataToAdd).draw();
+}
+
 function addComprobanteToTable(comprobante) {
   tablaComprobantes.row
     .add([
       `<span style="font-size: 0.7rem"}>${comprobante.id}</span>`,
+      comprobante.created_at,
       comprobante.ruc,
       comprobante.fecha_emision,
       comprobante.serie,
@@ -72,8 +122,44 @@ function addComprobanteToTable(comprobante) {
     .draw();
 }
 
-/** Agregar filas */
-comprobantes.forEach((comprobante) => addComprobanteToTable(comprobante));
+function updateComprobanteInTable(comprobante) {
+  /** Actualiza solo la fila de donde este el comprobante */
+  // Buscar la fila que tiene el ID del comprobante
+  var rowNode = tablaComprobantes.row(function(idx, data, node) {
+    return data[0].includes(comprobante.id); // ID está en la primera columna
+  });
+
+  if (rowNode.length) {
+    // Actualizar la fila con nuevos datos
+    rowNode.data([
+      `<span style="font-size: 0.7rem">${comprobante.id}</span>`,
+      comprobante.created_at,
+      comprobante.ruc,
+      comprobante.fecha_emision,
+      comprobante.serie,
+      comprobante.numero,
+      comprobante.monto,
+      comprobante.tipo_comprobante,
+      renderRowStatus(comprobante.estado_comprobante),
+      renderRowStatus(comprobante.estado_ruc),
+      renderRowStatus(comprobante.cod_domiciliaria_ruc),
+      `<span style="font-size: 0.7rem">${comprobante.observaciones || ''}</span>`,
+      renderRowOptions(comprobante),
+    ]).draw(false);  // El false evita que la tabla se recargue completamente
+  } else {
+    // Si no se encuentra la fila, agregarla como una nueva
+    addComprobanteToTable(comprobante);
+  }
+}
+
+function updateMultipleComprobantes(listComprobantes) {
+  /** Si se quiere actualizar solo algunas filas */
+  showLoading(true)
+  listComprobantes.forEach((comprobante) => {
+    updateComprobanteInTable(comprobante);
+  });
+  showLoading(false)
+}
 
 function renderRowStatus(status) {
   const colorStatus = {
@@ -94,12 +180,12 @@ function renderRowStatus(status) {
 function renderRowOptions(comprobante) {
   const observaciones = comprobante.observaciones || "Sin Observaciones";
   const buttonValidar = `
-        <button onclick="validar(${comprobante.id})" class="btn btn-light col-3 col-sm-4">
+        <button onclick="validar(${comprobante.id})" class="btn btn-light col-6">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </button>
     `;
   const buttonEliminar = `
-        <button onclick="eliminar(${comprobante.id})" class="btn btn-light col-3 col-sm-4">
+        <button onclick="eliminar(${comprobante.id})" class="btn btn-light col-6">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
         </button>
     `;
@@ -152,7 +238,7 @@ function eliminarComprobante(id) {
       id: id,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -161,7 +247,7 @@ function eliminarComprobante(id) {
           throw error;
         });
       }
-      response.json();
+      return response.json();
     })
     .then((data) => {
       console.log(data);
@@ -214,7 +300,7 @@ function validarComprobante(id) {
       id: id,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -225,11 +311,11 @@ function validarComprobante(id) {
       }
       return response.json();
     })
-    .then((data) => {
-      // console.log('data-', data);
-      Swal.fire("Validacion completada", "", "success").then(() => {
-        location.reload();
-      });
+    .then((responseJson) => {
+      console.log('responseJson', responseJson);
+      Swal.fire("Validacion completada", "", "success")
+      const dataComprobante = responseJson.data_comprobante;
+      updateComprobanteInTable(comprobante=dataComprobante)
     })
     .catch((error) => {
       let errorMessage;
@@ -248,9 +334,9 @@ function validarComprobante(id) {
     .finally(() => loading.classList.remove("loading"));
 }
 
-function validarMasivamente() {
+function validarMasivamenteDelDia() {
   Swal.fire({
-    title: "¿Validar comprobantes?",
+    title: "¿Validar comprobantes registrados en el día?",
     icon: "question",
     showCancelButton: true,
     confirmButtonColor: "#34d399",
@@ -258,21 +344,21 @@ function validarMasivamente() {
     confirmButtonText: "Validar",
   }).then((result) => {
     if (result.isConfirmed) {
-      validarComprobantes();
+      validarComprobantesDelDia();
     }
   });
 }
 
-function validarComprobantes() {
-  loading.classList.add("loading");
-  const url = "/api/validar/comprobantes";
+function validarComprobantesDelDia() {
+  showLoading(true)
+  const url = "/api/validar/comprobantes_del_dia";
   fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then((errorData) => {
@@ -289,9 +375,10 @@ function validarComprobantes() {
         "Validaciones completadas",
         `${responseJson.info}`,
         "success"
-      ).then(() => {
-        location.reload();
-      });
+      )
+      const dataComprobantes = responseJson.data_comprobantes;
+      // loadDataToTable(listComprobantes=dataComprobantes);
+      updateMultipleComprobantes(listComprobantes=dataComprobantes);
     })
     .catch((error) => {
       let errorMessage;
@@ -313,5 +400,87 @@ function validarComprobantes() {
         location.reload();
       });
     })
-    .finally(() => loading.classList.remove("loading"));
+    .finally(() => showLoading(false));
+}
+
+
+function validarMasivamente() {
+  Swal.fire({
+    title: "¿Validar comprobantes no validados?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#34d399",
+    cancelButtonColor: "#fca5a5",
+    confirmButtonText: "Validar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      validarComprobantes();
+    }
+  });
+}
+
+function validarComprobantes() {
+  showLoading(true);
+  const url = "/api/validar/comprobantes";
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then((errorData) => {
+          const error = new Error("Respuesta no satisfactoria");
+          error.data = errorData;
+          error.status = response.status;
+          throw error;
+        });
+      }
+      return response.json();
+    })
+    .then((responseJson) => {
+      Swal.fire(
+        "Validaciones completadas",
+        `${responseJson.info}`,
+        "success"
+      )
+      const dataComprobantes = responseJson.data_comprobantes;
+      loadDataToTable(listComprobantes=dataComprobantes);
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data) {
+        // Error del servidor
+        errorMessage = `Error del servidor: ${
+          error.data.message || JSON.stringify(error.data)
+        }`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      if (error.status === 404) {
+        Swal.fire("No se validaron", errorMessage, "info");
+        return;
+      }
+      console.error(errorMessage);
+      Swal.fire("Error en la validación", errorMessage, "error").then(() => {
+        location.reload();
+      });
+    })
+    .finally(() => showLoading(false));
+}
+
+
+const showLoadingData = () => {
+  // Mostrar el elemento de carga y ocultar el contenido
+  document.getElementById("jsLoadingTable").style.display = "flex";
+  document.getElementById("tablaComprobantes").style.display = "none";
+}
+
+const hideLoadingData = () => {
+  // Ocultar el elemento de carga y mostrar el contenido
+  document.getElementById("jsLoadingTable").style.display = "none";
+  document.getElementById("tablaComprobantes").style.display = "block";
 }

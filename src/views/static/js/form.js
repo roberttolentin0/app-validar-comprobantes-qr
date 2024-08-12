@@ -1,12 +1,13 @@
 const formQr = document.getElementById("formQr");
 const inputDataQr = document.getElementById("dataQr");
 const formDataComprobante = document.getElementById("formDataComprobante");
+const buttonCrearValidar = document.getElementById("buttonCrearValidar");
 var clickSubmit = false;
+
 
 formQr.addEventListener("submit", (event) => {
   event.preventDefault();
   if (clickSubmit) {
-    console.log("Ya ha creado, Esperar...");
     infoAutoClose("Agregando, Esperar...", 2500);
     return;
   }
@@ -29,11 +30,12 @@ formQr.addEventListener("submit", (event) => {
         console.log(key, value);
     });
   // return
+  showLoading(true);
   fetch(`/api/create_comprobante`, {
     method: "POST",
     body: formData,
   })
-    .then(response => {
+    .then(async (response) => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then(errorData => {
@@ -63,7 +65,10 @@ formQr.addEventListener("submit", (event) => {
       Swal.fire("No se creo!", errorMessage, "error");
       clickSubmit = false;
     })
-    .finally(() => inputDataQr.value = "");
+    .finally(() => {
+      inputDataQr.value = "";
+      showLoading(false);
+    });
 });
 
 formDataComprobante.addEventListener("submit", (event) => {
@@ -75,15 +80,16 @@ formDataComprobante.addEventListener("submit", (event) => {
   infoAutoClose("Agregando, Esperar...");
   clickSubmit = true;
   const formData = new FormData(formDataComprobante);
-  formData.forEach(function(value, key){
-        console.log(key, value);
-    });
+  // formData.forEach(function(value, key){
+  //       console.log(key, value);
+  //   });
   // return
+  showLoading(true);
   fetch(`/api/create_comprobante`, {
     method: "POST",
     body: formData,
   })
-    .then(response => {
+    .then(async response => {
       if (!response.ok) {
         // Si la respuesta no está en el rango de 200-299
         return response.json().then(errorData => {
@@ -113,5 +119,67 @@ formDataComprobante.addEventListener("submit", (event) => {
       Swal.fire("No se creo!", errorMessage, "error");
       clickSubmit = false;
     })
-    .finally(() => inputDataQr.value = "");
+    .finally(() => showLoading(false));
 });
+
+function guardarValidar() {
+
+  if (!formDataComprobante.checkValidity()) {
+    formDataComprobante.reportValidity();
+    return;
+  }
+
+  if (clickSubmit) {
+    infoAutoClose("Agregando y validando, Esperar...", 2500);
+    return;
+  }
+  infoAutoClose("Agregando y validando, Esperar...");
+  clickSubmit = true;
+  const formData = new FormData(formDataComprobante);
+  // formData.forEach(function(value, key){
+  //       console.log(key, value);
+  //   });
+  // return
+  showLoading(true);
+  fetch(`/api/create_and_validate`, {
+    method: "POST",
+    body: formData,
+  })
+    .then(async response => {
+      if (!response.ok) {
+        // Si la respuesta no está en el rango de 200-299
+        return response.json().then(errorData => {
+          const error = new Error('Respuesta no satisfactoria');
+          error.data = errorData;
+          throw error;
+        })
+      }
+      return response.json();
+    })
+    .then(responseJson => {
+      const comprobante = responseJson.new_comprobante;
+      const msg = responseJson.message || '';
+      addComprobanteToTable(comprobante)
+      successAutoClose("Comprobante agregado", 500);
+      clickSubmit = false
+      console.log('msg', msg)
+      if (msg != '') {
+        Swal.fire("Alerta!!", msg, "warning");
+      }
+    })
+    .catch((error) => {
+      let errorMessage;
+      if (error.data){
+        // Error del servidor
+        errorMessage = `Error del servidor: ${error.data.message || JSON.stringify(error.data)}`;
+      } else {
+        // Error de red u otro tipo de error
+        errorMessage = `Error: ${error.message}`;
+      }
+      console.error(errorMessage);
+      Swal.fire("No se creo!", errorMessage, "error");
+      clickSubmit = false;
+    })
+    .finally(() => showLoading(false));
+};
+

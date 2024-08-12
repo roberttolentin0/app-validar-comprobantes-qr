@@ -5,7 +5,7 @@ from ..models.tipoComprobanteModel import TipoComprobante
 connection = DBConnection()
 
 def list_all_type() -> List[TipoComprobante]:
-    print('Entro list all type')
+    # print('Entro list all type')
     query = """
         SELECT id, cod_comprobante, descripcion
 	    FROM public.tipo_comprobante;

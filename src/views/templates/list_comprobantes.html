@@ -12,10 +12,6 @@
 {% endblock %}
 
 {% block content %}
-    <!-- Form para ingresar comprobantes -->
-    <div class="container p-3 rounded shadow wrapper">
-        {% include 'form.html'%}
-    </div>
     <!-- Tabla de comprobantes -->
     <div class="mx-auto my-4 wrapper">
         {% include 'table_comprobantes.html' %}
@@ -38,5 +34,4 @@
         console.log('comprobantes', comprobantes)
     </script>
     <script src="{{ url_for('static', filename = 'js/listComprobantes.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/form.js') }}"></script>
 {% endblock %}

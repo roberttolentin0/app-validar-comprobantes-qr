@@ -1,28 +1,64 @@
 <div id='comprobantes' class="p-3 rounded shadow">
     <div class="text-center">
+        {% if show_validar_comprobantes_hoy %}
+        <button type="button" class="btn btn-primary" onclick="validarMasivamenteDelDia()">
+            <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 52 52" enable-background="new 0 0 52 52" xml:space="preserve" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M44,2.5H19c-2.6,0-4.7,2.1-4.7,4.7V8c0,0.5,0.3,0.8,0.8,0.8h22.7c2.6,0,4.7,2.1,4.7,4.7v24.3 c0,0.5,0.3,0.8,0.8,0.8H44c2.6,0,4.7-2.1,4.7-4.7V7.2C48.7,4.6,46.6,2.5,44,2.5z"></path> <path d="M33,13.5H8c-2.6,0-4.7,2.1-4.7,4.7v26.6c0,2.6,2.1,4.7,4.7,4.7H33c2.6,0,4.7-2.1,4.7-4.7V18.2 C37.8,15.6,35.6,13.5,33,13.5z M31,26.8l-12,12c-0.5,0.5-1,0.7-1.6,0.7c-0.5,0-1.2-0.2-1.6-0.7l-5.8-5.8c-0.5-0.5-0.5-1.2,0-1.6 l1.6-1.6c0.5-0.5,1.2-0.5,1.6,0l4.2,4.2l10.3-10.3c0.5-0.5,1.2-0.5,1.6,0l1.6,1.6C31.4,25.6,31.4,26.4,31,26.8z"></path> </g></svg>
+            <span class="text">Validar comprobantes registrados</span>
+        </button>
+        <a href="/lista_comprobantes" class="btn btn-secondary" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3H6a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h4M16 17l5-5-5-5M19.8 12H9"/></svg>
+            <span class="text">Ver historial</span>
+        </a>
+        {% endif %}
+        {% if show_validar_masivo %}
         <button type="button" class="btn btn-primary" onclick="validarMasivamente()">
             <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 52 52" enable-background="new 0 0 52 52" xml:space="preserve" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M44,2.5H19c-2.6,0-4.7,2.1-4.7,4.7V8c0,0.5,0.3,0.8,0.8,0.8h22.7c2.6,0,4.7,2.1,4.7,4.7v24.3 c0,0.5,0.3,0.8,0.8,0.8H44c2.6,0,4.7-2.1,4.7-4.7V7.2C48.7,4.6,46.6,2.5,44,2.5z"></path> <path d="M33,13.5H8c-2.6,0-4.7,2.1-4.7,4.7v26.6c0,2.6,2.1,4.7,4.7,4.7H33c2.6,0,4.7-2.1,4.7-4.7V18.2 C37.8,15.6,35.6,13.5,33,13.5z M31,26.8l-12,12c-0.5,0.5-1,0.7-1.6,0.7c-0.5,0-1.2-0.2-1.6-0.7l-5.8-5.8c-0.5-0.5-0.5-1.2,0-1.6 l1.6-1.6c0.5-0.5,1.2-0.5,1.6,0l4.2,4.2l10.3-10.3c0.5-0.5,1.2-0.5,1.6,0l1.6,1.6C31.4,25.6,31.4,26.4,31,26.8z"></path> </g></svg>
-            <span class="text">Validar comprobantes</span>
+            <span class="text">Validar todos los comprobantes</span>
         </button>
+        {% endif %}
     </div>
-	<table id="tablaComprobantes" class="table table-hover" style="width:100%; padding-top: 1em;  padding-bottom: 1em;">
+	<table id="tablaComprobantes" style="display: none;" class="table table-hover" style="width:100%; padding-top: 1em;  padding-bottom: 1em;">
 		<thead>
 			<tr>
                 <th data-priority="1">#</th>
-                <th data-priority="2">RUC</th>
-                <th data-priority="3">Fecha emision</th>
-                <th data-priority="4">Serie</th>
-                <th data-priority="5">Número</th>
-                <th data-priority="6">Monto</th>
-                <th data-priority="7">Tipo</th>
-                <th data-priority="8">Estado Cp</th>
-                <th data-priority="9">Estado RUC</th>
-                <th data-priority="10">Cond. Domic. RUC</th>
-                <th data-priority="11">Observaciones</th>
-                <th data-priority="12">Opciones</th>
+                <th data-priority="2">Fecha registro</th>
+                <th data-priority="3" class="text-center">RUC</th>
+                <th data-priority="4">Fecha emision</th>
+                <th data-priority="5">Serie</th>
+                <th data-priority="6">Número</th>
+                <th data-priority="7">Monto</th>
+                <th data-priority="8">Tipo</th>
+                <th data-priority="9">Estado Cp</th>
+                <th data-priority="10">Estado RUC</th>
+                <th data-priority="11">Cond. Domic. RUC</th>
+                <th data-priority="12">Observaciones</th>
+                <th data-priority="13">Opciones</th>
 			</tr>
+            <tr>
+                <th></th>
+                <th><input type="text" placeholder="Fecha r.." style="width: 100%;"/></th>
+                <th><input type="text" placeholder="RUC" /></th>
+                <th><input type="text" placeholder="Fecha e..." /></th>
+                <th><input type="text" placeholder="Serie" /></th>
+                <th><input type="text" placeholder="Número" /></th>
+                <th></th>
+                <th><input type="text" placeholder="Tipo" /></th>
+                <th><input type="text" placeholder="Estado..." /></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
 		</thead>
 		<tbody class="text-xs text-center">
 		</tbody>
 	</table>
+</div>
+<div id="jsLoadingTable" style="display: flex; align-items: center; justify-content: center;">
+    <div>
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p>Cargando datos...</p>
+    </div>
 </div>

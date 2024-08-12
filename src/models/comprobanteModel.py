@@ -11,6 +11,7 @@ class Comprobante:
     numero: int
     monto: float
     id_tipo_comprobante: Optional[int] = None
+    cod_comprobante: Optional[str] = None # Info de la tabla tipo_comprobante
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -24,5 +25,6 @@ class Comprobante:
             'numero': self.numero,
             'monto': self.monto,
             'id_tipo_comprobante': self.id_tipo_comprobante,
+            'cod_comprobante': self.cod_comprobante,
             'created_at': self.created_at
         }

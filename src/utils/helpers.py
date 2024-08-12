@@ -6,6 +6,7 @@ from ..constans import RUC_EMPRESA
 from ..models.viewComprobantesEstadosModel import ViewComprobanteEstados
 from .DateFormat import DateFormat
 
+
 def parsed_comprobante_with_status(_comprobante: ViewComprobanteEstados) -> ViewComprobanteEstados:
     # Mapea el estado del comprobante
     _comprobante.estado_comprobante = ESTADO_COMPROBANTE.get(str(_comprobante.estado_comprobante), '')
@@ -14,11 +15,12 @@ def parsed_comprobante_with_status(_comprobante: ViewComprobanteEstados) -> View
     # Mapea la condición de domicilio del contribuyente
     _comprobante.cod_domiciliaria_ruc = CONDICION_DOMICILIO_CONTRIBUYENTE.get(str(_comprobante.cod_domiciliaria_ruc), '')
     _comprobante.fecha_emision = DateFormat.convert_date_to_ddmmyy(_comprobante.fecha_emision)
+    _comprobante.created_at = DateFormat.convert_date_to_ddmmyy(_comprobante.created_at)
     return _comprobante
 
 
 def convert_to_postgres_format(amount_str):
-    # Eliminar comas que están seguidas de tres dígitos (separadores de miles)
+    ''' Para los montos eliminar comas que están seguidas de tres dígitos (separadores de miles) '''
     amount_str = re.sub(r'(?<=\d),(?=\d{3}\b)', '', amount_str)
     # Reemplazar la coma decimal por un punto decimal
     amount_str = amount_str.replace(',', '.')
@@ -57,7 +59,7 @@ def parse_list_with_signs(lista_entrada):
     return resultado
 
 
-def parse_qr_code(input_str):
+def parse_qr_code(input_str: str) -> list:
     '''input_str: 20100127165|01|F100|00451161|99.61|653.06|2024-05-22|6|20609699982|hgH0bEf7HK57HHPG1p6ZihmbQvI='''
     # Separar la entrada usando el delimitador '|' or ']'
     parts = re.split(r'\||\]|\/', input_str)

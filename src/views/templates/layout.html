@@ -9,13 +9,14 @@
     <title>{{ title }}</title>
 </head>
 <body>
-    <div class="container py-4 px-3 mx-auto">
+    <div class="container py-4 mx-auto">
         <header class="d-flex justify-content-center align-items-center">
             {% include 'navigation.html'%}
         </header>
         <main>
             {% block content %}{% endblock %}
         </main>
+        <div id="jsLoading" class="" role="status"></div>
     </div>
 
     <!-- sweetalert2 -->
@@ -26,6 +27,7 @@
     <!-- jQuery -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="{{ url_for('static', filename = 'js/toasts.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/main.js') }}"></script>
     {% block script %}{% endblock %}
 </body>
 </html>
